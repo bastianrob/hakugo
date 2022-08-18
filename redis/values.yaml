@@ -1,0 +1,5 @@
+architecture: replication
+readReplicas:
+  replicaCount: 3
+auth:
+  password: ${password}

@@ -1,0 +1,36 @@
+table:
+  name: pricing
+  schema: public
+array_relationships:
+  - name: vehicle_pricings
+    using:
+      foreign_key_constraint_on:
+        column: pricing_id
+        table:
+          name: vehicle_pricing
+          schema: public
+select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - tags
+        - id
+        - price
+        - term
+      filter: {}
+  - role: customer
+    permission:
+      columns:
+        - id
+        - price
+        - tags
+        - term
+      filter: {}
+  - role: partner
+    permission:
+      columns:
+        - tags
+        - id
+        - price
+        - term
+      filter: {}

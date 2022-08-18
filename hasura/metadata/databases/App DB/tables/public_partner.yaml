@@ -1,0 +1,82 @@
+table:
+  name: partner
+  schema: public
+object_relationships:
+  - name: credential
+    using:
+      foreign_key_constraint_on: credential_id
+  - name: partner_type
+    using:
+      foreign_key_constraint_on: type
+array_relationships:
+  - name: attachments
+    using:
+      manual_configuration:
+        column_mapping:
+          id: reference_id
+        insertion_order: null
+        remote_table:
+          name: attachment
+          schema: public
+  - name: headquarters
+    using:
+      foreign_key_constraint_on:
+        column: partner_id
+        table:
+          name: headquarter
+          schema: public
+  - name: vehicles
+    using:
+      foreign_key_constraint_on:
+        column: partner_id
+        table:
+          name: vehicle
+          schema: public
+select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - credential_id
+        - id
+        - name
+        - type
+        - activated_at
+        - created_at
+        - updated_at
+      filter: {}
+  - role: customer
+    permission:
+      columns:
+        - credential_id
+        - id
+        - name
+        - type
+        - activated_at
+        - created_at
+        - updated_at
+      filter: {}
+  - role: partner
+    permission:
+      columns:
+        - activated_at
+        - created_at
+        - credential_id
+        - id
+        - name
+        - type
+        - updated_at
+      filter:
+        id:
+          _eq: x-hasura-partner-id
+      limit: 1
+update_permissions:
+  - role: partner
+    permission:
+      columns:
+        - name
+      filter:
+        id:
+          _eq: x-hasura-partner-id
+      check:
+        id:
+          _eq: x-hasura-partner-id

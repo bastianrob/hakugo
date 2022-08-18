@@ -1,0 +1,64 @@
+table:
+  name: vehicle
+  schema: public
+object_relationships:
+  - name: headquarter
+    using:
+      foreign_key_constraint_on: headquarter_id
+  - name: partner
+    using:
+      foreign_key_constraint_on: partner_id
+array_relationships:
+  - name: bookings
+    using:
+      foreign_key_constraint_on:
+        column: vehicle_id
+        table:
+          name: booking
+          schema: public
+  - name: vehicle_pricings
+    using:
+      foreign_key_constraint_on:
+        column: vehicle_id
+        table:
+          name: vehicle_pricing
+          schema: public
+select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - headquarter_id
+        - id
+        - partner_id
+        - year
+        - brand
+        - model
+        - created_at
+        - updated_at
+      filter: {}
+  - role: customer
+    permission:
+      columns:
+        - headquarter_id
+        - id
+        - partner_id
+        - year
+        - brand
+        - model
+        - created_at
+        - updated_at
+      filter: {}
+  - role: partner
+    permission:
+      columns:
+        - headquarter_id
+        - id
+        - partner_id
+        - year
+        - brand
+        - model
+        - created_at
+        - updated_at
+      filter:
+        partner_id:
+          _eq: x-hasura-partner-id

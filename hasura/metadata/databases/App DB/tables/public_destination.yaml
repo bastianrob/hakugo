@@ -1,0 +1,39 @@
+table:
+  name: destination
+  schema: public
+array_relationships:
+  - name: bookings
+    using:
+      foreign_key_constraint_on:
+        column: destination_id
+        table:
+          name: booking
+          schema: public
+  - name: headquarters
+    using:
+      foreign_key_constraint_on:
+        column: destination_id
+        table:
+          name: headquarter
+          schema: public
+select_permissions:
+  - role: customer
+    permission:
+      columns:
+        - id
+        - country_code
+        - city
+        - district
+        - province
+        - zip_code
+      filter: {}
+  - role: partner
+    permission:
+      columns:
+        - id
+        - country_code
+        - city
+        - district
+        - province
+        - zip_code
+      filter: {}

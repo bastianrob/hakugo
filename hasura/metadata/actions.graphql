@@ -1,0 +1,18 @@
+type Mutation {
+  customerLogin(
+    user: String!
+    pass: String!
+  ): LoginResponse
+}
+
+type Mutation {
+  partnerLogin(
+    user: String!
+    pass: String!
+  ): LoginResponse
+}
+
+type LoginResponse {
+  accessToken: String!
+}
+

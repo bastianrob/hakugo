@@ -1,0 +1,77 @@
+table:
+  name: booking
+  schema: public
+object_relationships:
+  - name: destination
+    using:
+      manual_configuration:
+        column_mapping:
+          destination_id: id
+        insertion_order: null
+        remote_table:
+          name: destination
+          schema: public
+  - name: vehicle
+    using:
+      manual_configuration:
+        column_mapping:
+          vehicle_id: id
+        insertion_order: null
+        remote_table:
+          name: vehicle
+          schema: public
+insert_permissions:
+  - role: customer
+    permission:
+      check: {}
+      columns:
+        - destination_id
+        - id
+        - vehicle_id
+        - code
+        - email
+        - name
+        - phone
+        - created_at
+        - from
+        - until
+        - updated_at
+select_permissions:
+  - role: customer
+    permission:
+      columns:
+        - destination_id
+        - id
+        - vehicle_id
+        - code
+        - email
+        - name
+        - phone
+        - created_at
+        - from
+        - until
+        - updated_at
+      filter:
+        _or:
+          - email:
+              _eq: x-hasura-user-id
+          - phone:
+              _eq: x-hasura-user-id
+  - role: partner
+    permission:
+      columns:
+        - destination_id
+        - id
+        - vehicle_id
+        - code
+        - email
+        - name
+        - phone
+        - created_at
+        - from
+        - until
+        - updated_at
+      filter:
+        vehicle:
+          partner_id:
+            _eq: x-hasura-partner-id

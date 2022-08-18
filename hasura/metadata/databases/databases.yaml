@@ -1,0 +1,9 @@
+- name: App DB
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: PG_DATABASE_URL
+      isolation_level: read-committed
+      use_prepared_statements: false
+  tables: "!include App DB/tables/tables.yaml"

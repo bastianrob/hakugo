@@ -1,0 +1,56 @@
+table:
+  name: headquarter
+  schema: public
+object_relationships:
+  - name: destination
+    using:
+      foreign_key_constraint_on: destination_id
+  - name: partner
+    using:
+      foreign_key_constraint_on: partner_id
+array_relationships:
+  - name: attachments
+    using:
+      manual_configuration:
+        column_mapping:
+          id: reference_id
+        insertion_order: null
+        remote_table:
+          name: attachment
+          schema: public
+  - name: vehicles
+    using:
+      foreign_key_constraint_on:
+        column: headquarter_id
+        table:
+          name: vehicle
+          schema: public
+select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - destination_id
+        - id
+        - partner_id
+        - point
+        - name
+        - created_at
+        - updated_at
+      filter: {}
+  - role: customer
+    permission:
+      columns:
+        - destination_id
+        - id
+        - partner_id
+        - point
+        - name
+        - created_at
+        - updated_at
+      filter: {}
+  - role: partner
+    permission:
+      columns: []
+      filter:
+        partner_id:
+          _eq: X-Hasura-User-Id

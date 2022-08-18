@@ -1,0 +1,50 @@
+actions:
+  - name: customerLogin
+    definition:
+      kind: synchronous
+      handler: '{{HOST_CREDENTIAL_SERVICE}}/authenticate'
+      timeout: 10
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "data": {
+                "identity": {{$body.input.user}},
+                "password": {{$body.input.pass}},
+                "role": "customer"
+              }
+            }
+        template_engine: Kriti
+        version: 2
+    permissions:
+      - role: anonymous
+      - role: customer
+  - name: partnerLogin
+    definition:
+      kind: synchronous
+      handler: '{{HOST_CREDENTIAL_SERVICE}}/authenticate'
+      timeout: 10
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "data": {
+                "identity": {{$body.input.user}},
+                "password": {{$body.input.pass}},
+                "role": "partner"
+              }
+            }
+        template_engine: Kriti
+        version: 2
+    permissions:
+      - role: anonymous
+      - role: partner
+    comment: partnerLogin
+custom_types:
+  enums: []
+  input_objects: []
+  objects:
+    - name: LoginResponse
+  scalars: []

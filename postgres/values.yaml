@@ -1,0 +1,11 @@
+architecture: replication
+readReplicas:
+  replicaCount: 3
+auth:
+  username: ${username}
+  password: ${password}
+  database: ${database}
+  postgresPassword: ${postgresPassword}
+  replicationPassword: ${replicationPassword}
+persistence:
+  existingClaim: "postgres-pv-claim"

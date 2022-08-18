@@ -1,0 +1,30 @@
+table:
+  name: attachment
+  schema: public
+select_permissions:
+  - role: anonymous
+    permission:
+      columns: []
+      filter: {}
+  - role: customer
+    permission:
+      columns:
+        - id
+        - reference_id
+        - size
+        - mime_type
+        - name
+        - reference_table
+        - src
+      filter: {}
+  - role: partner
+    permission:
+      columns:
+        - id
+        - reference_id
+        - size
+        - mime_type
+        - name
+        - reference_table
+        - src
+      filter: {}
