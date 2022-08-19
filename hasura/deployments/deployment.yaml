@@ -52,6 +52,11 @@ spec:
             configMapKeyRef:
               name: hasura-configmap
               key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
+        - name: HOST_CREDENTIAL_SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: hasura-configmap
+              key: HOST_CREDENTIAL_SERVICE
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -65,10 +70,10 @@ kind: Service
 metadata:
   name: hasura-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: hasura
   ports:
   - protocol: TCP
-    port: 80
+    port: 8080
     targetPort: 8080
