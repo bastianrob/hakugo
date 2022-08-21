@@ -6,13 +6,32 @@ type Mutation {
 }
 
 type Mutation {
+  customerRegister(
+    reg: CustomerRegistrationInput!
+  ): CustomerRegistrationResponse
+}
+
+type Mutation {
   partnerLogin(
     user: String!
     pass: String!
   ): LoginResponse
 }
 
+input CustomerRegistrationInput {
+  name: String!
+  email: String!
+  phone: String!
+  password: String!
+  confirmation: String!
+  provider: String!
+}
+
 type LoginResponse {
   accessToken: String!
+}
+
+type CustomerRegistrationResponse {
+  id: Int!
 }
 

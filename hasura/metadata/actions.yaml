@@ -20,6 +20,28 @@ actions:
     permissions:
       - role: anonymous
       - role: customer
+  - name: customerRegister
+    definition:
+      kind: synchronous
+      handler: '{{HOST_CREDENTIAL_SERVICE}}/register'
+      timeout: 10
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "data": {
+                "name": {{$body.input.reg.username}},
+                "email": {{$body.input.reg.email}},
+                "phone": {{$body.input.reg.phone}},
+                "password": {{$body.input.reg.password}},
+                "confirmation": {{$body.input.reg.confirmation}},
+                "provider": {{$body.input.arg1.provider}}
+              }
+            }
+        template_engine: Kriti
+        version: 2
+    comment: customerRegister
   - name: partnerLogin
     definition:
       kind: synchronous
@@ -44,7 +66,9 @@ actions:
     comment: partnerLogin
 custom_types:
   enums: []
-  input_objects: []
+  input_objects:
+    - name: CustomerRegistrationInput
   objects:
     - name: LoginResponse
+    - name: CustomerRegistrationResponse
   scalars: []
