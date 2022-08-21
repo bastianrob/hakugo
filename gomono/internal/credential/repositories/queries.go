@@ -21,7 +21,7 @@ type FindCredentialByIdentityResult struct {
 }
 
 // findCredentialByIdentity return error if not found
-func (svc *CredentialService) findCredentialByIdentity(ctx context.Context, identity string) (*FindCredentialByIdentityResult, error) {
+func (repo *CredentialRepository) FindCredentialByIdentity(ctx context.Context, identity string) (*FindCredentialByIdentityResult, error) {
 	query := graphql.NewRequest(`
 		query findCredentialByIdentity($identity: String!) {
 			credential(where: {identity: {_eq: $identity}}) {
@@ -40,7 +40,7 @@ func (svc *CredentialService) findCredentialByIdentity(ctx context.Context, iden
 	query.Var("identity", identity)
 
 	resp := &FindCredentialByIdentityResult{}
-	if err := svc.gqlClient.Run(ctx, query, resp); err != nil {
+	if err := repo.gqlClient.Run(ctx, query, resp); err != nil {
 		return nil, err
 	}
 
@@ -60,7 +60,7 @@ type CountCredentialByIdentityResult struct {
 }
 
 // countCredentialByIdentity return error 0 if not found
-func (svc *CredentialService) countCredentialByIdentity(ctx context.Context, identity string) (int64, error) {
+func (repo *CredentialRepository) CountCredentialByIdentity(ctx context.Context, identity string) (int64, error) {
 	query := graphql.NewRequest(`
 		query countCredentialByIdentity($identity: String!) {
 			credential: credential_aggregate(where: {identity: {_eq: $identity}}) {
@@ -75,7 +75,7 @@ func (svc *CredentialService) countCredentialByIdentity(ctx context.Context, ide
 	query.Var("identity", identity)
 
 	resp := &CountCredentialByIdentityResult{}
-	if err := svc.gqlClient.Run(ctx, query, resp); err != nil {
+	if err := repo.gqlClient.Run(ctx, query, resp); err != nil {
 		return 0, err
 	}
 

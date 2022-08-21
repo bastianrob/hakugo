@@ -14,7 +14,7 @@ type CreateNewCustomerMutationResult struct {
 	} `json:"insertion"`
 }
 
-func (svc *CredentialService) createNewCustomer(ctx context.Context, reg Registration) (*CreateNewCustomerMutationResult, error) {
+func (repo *CredentialRepository) CreateNewCustomer(ctx context.Context, identity, password, provider string) (*CreateNewCustomerMutationResult, error) {
 	query := graphql.NewRequest(`
 		mutation createNewCustomer($identity: String!, $password: String!, $provider: String!) {
 			insertion: insert_credential_one(object: {identity: $identity, password: $password, provider: $provider}) {
@@ -24,12 +24,12 @@ func (svc *CredentialService) createNewCustomer(ctx context.Context, reg Registr
 	`)
 
 	query.Header.Add(configs.App.GraphQL.AuthHeader, configs.App.GraphQL.AuthSecret)
-	query.Var("identity", reg.Identity())
-	query.Var("password", reg.Password())
-	query.Var("provider", reg.Provider())
+	query.Var("identity", identity)
+	query.Var("password", password)
+	query.Var("provider", provider)
 
 	resp := &CreateNewCustomerMutationResult{}
-	if err := svc.gqlClient.Run(ctx, query, resp); err != nil {
+	if err := repo.gqlClient.Run(ctx, query, resp); err != nil {
 		return nil, err
 	}
 

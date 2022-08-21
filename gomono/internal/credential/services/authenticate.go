@@ -7,7 +7,7 @@ import (
 )
 
 func (svc *CredentialService) Authenticate(ctx context.Context, identity, password, role string) (string, error) {
-	result, err := svc.findCredentialByIdentity(ctx, identity)
+	result, err := svc.repo.FindCredentialByIdentity(ctx, identity)
 	if err != nil {
 		return "", err
 	}

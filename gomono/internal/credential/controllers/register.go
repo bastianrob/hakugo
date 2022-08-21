@@ -4,20 +4,25 @@ import (
 	"encoding/json"
 	"net/http"
 
-	credential "github.com/bastianrob/gomono/internal/credential/services"
 	"github.com/bastianrob/gomono/pkg/global"
 	"github.com/labstack/echo/v4"
 )
 
 type RegisterRequest struct {
-	User string `json:"identity"`
-	Pass string `json:"password"`
-	Conf string `json:"confirmation"`
-	Prov string `json:"provider"`
+	Fullname string `json:"name"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Pass     string `json:"password"`
+	Conf     string `json:"confirmation"`
+	Prov     string `json:"provider"`
+}
+
+func (r *RegisterRequest) Name() string {
+	return r.Fullname
 }
 
 func (r *RegisterRequest) Identity() string {
-	return r.User
+	return r.Email
 }
 
 func (r *RegisterRequest) Password() string {
@@ -30,16 +35,6 @@ func (r *RegisterRequest) Confirmation() string {
 
 func (r *RegisterRequest) Provider() string {
 	return r.Prov
-}
-
-func (r *RegisterRequest) SetPassword(pwd string) credential.Registration {
-	r.Pass = pwd
-	return r
-}
-
-func (r *RegisterRequest) SetProvider(prov string) credential.Registration {
-	r.Prov = prov
-	return r
 }
 
 type RegisterResponse struct {
@@ -60,13 +55,7 @@ func (cont *CredentialController) Register(e echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	response := &global.ResponseDTO[RegisterResponse]{
-		OK:      false,
-		Message: "Authenticated",
-		Data: RegisterResponse{
-			ID: id,
-		},
-	}
-
-	return e.JSON(http.StatusCreated, response)
+	return e.JSON(http.StatusCreated, RegisterResponse{
+		ID: id,
+	})
 }

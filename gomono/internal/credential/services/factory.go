@@ -1,22 +1,33 @@
 package credential
 
 import (
-	"github.com/bastianrob/gomono/internal/credential/configs"
+	"context"
+
+	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/machinebox/graphql"
 )
 
+type CredentialRepository interface {
+	FindCredentialByIdentity(context.Context, string) (*repositories.FindCredentialByIdentityResult, error)
+	CountCredentialByIdentity(context.Context, string) (int64, error)
+	CreateNewCustomer(ctx context.Context, identity, password, provider string) (*repositories.CreateNewCustomerMutationResult, error)
+}
+
 type CredentialService struct {
-	gqlClient *graphql.Client
+	repo     CredentialRepository
+	validate *validator.Validate
 }
 
 func InitializeService() *CredentialService {
-	return NewCredentialService(graphql.NewClient(configs.App.GraphQL.Host))
+	repo := repositories.InitializeRepository()
+	return NewCredentialService(repo)
 }
 
-func NewCredentialService(gqlClient *graphql.Client) *CredentialService {
+func NewCredentialService(repo CredentialRepository) *CredentialService {
 	return &CredentialService{
-		gqlClient: gqlClient,
+		repo:     repo,
+		validate: validator.New(),
 	}
 }
 
