@@ -3,8 +3,10 @@ package credential
 import (
 	"context"
 
+	"github.com/bastianrob/gomono/internal/credential/configs"
 	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
 	"github.com/go-playground/validator/v10"
+	"github.com/go-redis/redis/v9"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -15,19 +17,27 @@ type CredentialRepository interface {
 }
 
 type CredentialService struct {
-	repo     CredentialRepository
-	validate *validator.Validate
+	repo        CredentialRepository
+	redisClient redis.Cmdable
+	validate    *validator.Validate
 }
 
 func InitializeService() *CredentialService {
-	repo := repositories.InitializeRepository()
-	return NewCredentialService(repo)
+	return NewCredentialService(
+		repositories.InitializeRepository(),
+		redis.NewClient(&redis.Options{
+			Addr:     configs.App.Redis.Host,
+			Password: configs.App.Redis.Pass,
+			DB:       configs.App.Redis.DB,
+		}),
+	)
 }
 
-func NewCredentialService(repo CredentialRepository) *CredentialService {
+func NewCredentialService(repo CredentialRepository, redisClient *redis.Client) *CredentialService {
 	return &CredentialService{
-		repo:     repo,
-		validate: validator.New(),
+		repo:        repo,
+		redisClient: redisClient,
+		validate:    validator.New(),
 	}
 }
 

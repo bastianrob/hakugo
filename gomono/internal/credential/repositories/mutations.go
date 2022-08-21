@@ -9,9 +9,15 @@ import (
 )
 
 type CreateNewCustomerMutationResult struct {
-	Insertion struct {
-		ID int64 `json:"id"`
-	} `json:"insertion"`
+	Credential struct {
+		ID       int64  `json:"id"`
+		Identity string `json:"identity"`
+		Customer struct {
+			Name  string `json:"name"`
+			Email string `json:"email"`
+			Phone string `json:"phone"`
+		} `json:"customer"`
+	} `json:"credential"`
 }
 
 func (repo *CredentialRepository) CreateNewCustomer(
@@ -24,8 +30,27 @@ func (repo *CredentialRepository) CreateNewCustomer(
 ) (*CreateNewCustomerMutationResult, error) {
 	query := graphql.NewRequest(`
 		mutation createNewCustomer($name: String!, $identity: String!, $phone: String!, $password: String!, $provider: String!) {
-			insertion: insert_credential_one(object: {identity: $identity, password: $password, provider: $provider, customers: {data: [{name: $name, email: $identity, phone: $phone}]}}) {
+			credential: insert_credential_one(
+				object: {
+					identity: $identity,
+					password: $password,
+					provider: $provider,
+					customer: {
+						data: {
+							name: $name,
+							email: $identity,
+							phone: $phone
+						}
+					}
+				}
+			) {
 				id
+				identity
+				customer {
+					name
+					email
+					phone
+				}
 			}
 		}
 	`)
@@ -42,7 +67,7 @@ func (repo *CredentialRepository) CreateNewCustomer(
 		return nil, err
 	}
 
-	if resp.Insertion.ID <= 0 {
+	if resp.Credential.ID <= 0 {
 		return nil, exception.New(nil, "Credential Not Found")
 	}
 

@@ -16,7 +16,7 @@ func TestCredentialService_findCredentialByIdentity(t *testing.T) {
 
 	client := graphql.NewClient("http://localhost/v1/graphql")
 	repository := repositories.NewCredentialRepository(client)
-	service := NewCredentialService(repository)
+	service := NewCredentialService(repository, nil)
 	service.repo.FindCredentialByIdentity(context.Background(), "someone@email.com")
 }
 
@@ -26,7 +26,7 @@ func TestCredentialService_countCredentialByIdentity(t *testing.T) {
 
 	client := graphql.NewClient("http://localhost/v1/graphql")
 	repository := repositories.NewCredentialRepository(client)
-	service := NewCredentialService(repository)
+	service := NewCredentialService(repository, nil)
 	result, err := service.repo.CountCredentialByIdentity(context.Background(), "someone@email.com")
 	assert.NoError(t, err)
 	assert.Equal(t, true, result > 0, result)

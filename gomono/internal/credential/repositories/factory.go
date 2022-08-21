@@ -14,7 +14,6 @@ func InitializeRepository() *CredentialRepository {
 }
 
 func NewCredentialRepository(gqlClient *graphql.Client) *CredentialRepository {
-
 	return &CredentialRepository{
 		gqlClient: gqlClient,
 	}

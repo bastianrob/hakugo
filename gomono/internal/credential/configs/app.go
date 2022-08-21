@@ -13,6 +13,11 @@ type AppConfig struct {
 	JWT struct {
 		Secret string `env:"APP_JWT_SECRET,required,notEmpty"`
 	}
+	Redis struct {
+		Host string `env:"APP_REDIS_HOST,required,notEmpty"`
+		Pass string `env:"APP_REDIS_PASS,required,notEmpty"`
+		DB   int    `env:"APP_REDIS_DB,required,notEmpty"`
+	}
 }
 
 var App *AppConfig

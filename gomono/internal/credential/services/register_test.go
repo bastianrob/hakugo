@@ -4,8 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/alicebob/miniredis/v2"
 	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
 	"github.com/bastianrob/gomono/pkg/exception"
+	"github.com/go-redis/redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -77,16 +79,25 @@ func newRegistrationMock(name, identity, phone, password, confirmation, provider
 }
 
 func TestCredentialService_NewCustomer(t *testing.T) {
-	credentialService := NewCredentialService(func() *CredentialRepositoryMock {
-		m := &CredentialRepositoryMock{}
-		m.On("CountCredentialByIdentity", mock.Anything, "exists@email.com").Return(1, nil)
-		m.On("CountCredentialByIdentity", mock.Anything, mock.Anything).Return(0, nil)
-		m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-			Return(&repositories.CreateNewCustomerMutationResult{Insertion: struct {
-				ID int64 "json:\"id\""
-			}{ID: 1}}, nil)
-		return m
-	}())
+	credentialService := NewCredentialService(
+		func() *CredentialRepositoryMock {
+			m := &CredentialRepositoryMock{}
+			m.On("CountCredentialByIdentity", mock.Anything, "exists@email.com").Return(1, nil)
+			m.On("CountCredentialByIdentity", mock.Anything, mock.Anything).Return(0, nil)
+			m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+				Return(&repositories.CreateNewCustomerMutationResult{Credential: struct {
+					ID       int64  `json:"id"`
+					Identity string `json:"identity"`
+					Customer struct {
+						Name  string `json:"name"`
+						Email string `json:"email"`
+						Phone string `json:"phone"`
+					} `json:"customer"`
+				}{ID: 1}}, nil)
+			return m
+		}(),
+		nil,
+	)
 
 	type args struct {
 		ctx context.Context
@@ -234,5 +245,57 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 
 			assert.Equal(t, tt.should.returnedID, got, "returned id does not match")
 		})
+	}
+}
+
+func TestCredentialService_publishCustomerRegistrationStartedEvent(t *testing.T) {
+	miniredisServer := miniredis.RunT(t)
+	type args struct {
+		ctx    context.Context
+		result *repositories.CreateNewCustomerMutationResult
+	}
+	type should struct {
+		returnError bool
+	}
+	tests := []struct {
+		it     string
+		given  *CredentialService
+		when   args
+		should should
+	}{{
+		it: "Should successfully publish customer registration started event",
+		given: NewCredentialService(nil, redis.NewClient(&redis.Options{
+			Addr: miniredisServer.Addr(),
+		})),
+		when: args{
+			ctx: context.Background(),
+			result: &repositories.CreateNewCustomerMutationResult{
+				Credential: struct {
+					ID       int64  `json:"id"`
+					Identity string `json:"identity"`
+					Customer struct {
+						Name  string `json:"name"`
+						Email string `json:"email"`
+						Phone string `json:"phone"`
+					} `json:"customer"`
+				}{
+					ID: 1000,
+				},
+			},
+		},
+		should: should{
+			returnError: false,
+		},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.it, func(t *testing.T) {
+			err := tt.given.publishCustomerRegistrationStartedEvent(tt.when.ctx, tt.when.result)
+			if tt.should.returnError {
+				assert.Error(t, err, "should return an error")
+			}
+
+			assert.NoError(t, err, "should not return error")
+		})
+
 	}
 }
