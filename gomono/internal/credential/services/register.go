@@ -10,6 +10,7 @@ import (
 type Registration interface {
 	Name() string
 	Identity() string
+	Phone() string
 	Password() string
 	Confirmation() string
 	Provider() string
@@ -36,6 +37,10 @@ func (svc *CredentialService) NewCustomer(ctx context.Context, reg Registration)
 		return -1, exception.New(err, "Please input a valid email address")
 	}
 
+	if err = svc.validate.Var(reg.Phone(), "required,e164"); err != nil {
+		return -1, exception.New(err, "Please input a valid phone number")
+	}
+
 	if err = svc.validate.Var(reg.Password(), "required,min=8"); err != nil {
 		return -1, exception.New(err, "Password should be at least 8 characters long")
 	}
@@ -45,7 +50,7 @@ func (svc *CredentialService) NewCustomer(ctx context.Context, reg Registration)
 	}
 
 	hashedPassowrd, _ := hashPassword(reg.Password())
-	result, err := svc.repo.CreateNewCustomer(ctx, reg.Identity(), hashedPassowrd, reg.Provider())
+	result, err := svc.repo.CreateNewCustomer(ctx, reg.Name(), reg.Identity(), reg.Phone(), hashedPassowrd, reg.Provider())
 	if err != nil {
 		return -1, exception.New(err, "Failed to create new customer")
 	}

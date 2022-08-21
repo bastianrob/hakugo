@@ -10,8 +10,8 @@ import (
 
 type RegisterRequest struct {
 	Fullname string `json:"name"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
+	Mail     string `json:"email"`
+	Phon     string `json:"phone"`
 	Pass     string `json:"password"`
 	Conf     string `json:"confirmation"`
 	Prov     string `json:"provider"`
@@ -22,7 +22,11 @@ func (r *RegisterRequest) Name() string {
 }
 
 func (r *RegisterRequest) Identity() string {
-	return r.Email
+	return r.Mail
+}
+
+func (r *RegisterRequest) Phone() string {
+	return r.Phon
 }
 
 func (r *RegisterRequest) Password() string {

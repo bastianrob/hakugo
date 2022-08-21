@@ -25,6 +25,11 @@ func (m *RegistrationMock) Identity() string {
 	return args.String(0)
 }
 
+func (m *RegistrationMock) Phone() string {
+	args := m.Called()
+	return args.String(0)
+}
+
 func (m *RegistrationMock) Password() string {
 	args := m.Called()
 	return args.String(0)
@@ -54,16 +59,17 @@ func (m *CredentialRepositoryMock) CountCredentialByIdentity(ctx context.Context
 	return int64(args.Int(0)), args.Error(1)
 }
 
-func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, identity string, password string, provider string) (*repositories.CreateNewCustomerMutationResult, error) {
+func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider string) (*repositories.CreateNewCustomerMutationResult, error) {
 	args := m.Called(ctx, identity, password, provider)
 	return args.Get(0).(*repositories.CreateNewCustomerMutationResult), args.Error(1)
 }
 
-func newRegistrationMock(name, identity, password, confirmation, provider string) *RegistrationMock {
+func newRegistrationMock(name, identity, phone, password, confirmation, provider string) *RegistrationMock {
 	m := &RegistrationMock{}
 
 	m.On("Name").Return(name)
 	m.On("Identity").Return(identity)
+	m.On("Phone").Return(phone)
 	m.On("Password").Return(password)
 	m.On("Confirmation").Return(confirmation)
 	m.On("Provider").Return(provider)
@@ -75,9 +81,10 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 		m := &CredentialRepositoryMock{}
 		m.On("CountCredentialByIdentity", mock.Anything, "exists@email.com").Return(1, nil)
 		m.On("CountCredentialByIdentity", mock.Anything, mock.Anything).Return(0, nil)
-		m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&repositories.CreateNewCustomerMutationResult{Insertion: struct {
-			ID int64 "json:\"id\""
-		}{ID: 1}}, nil)
+		m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			Return(&repositories.CreateNewCustomerMutationResult{Insertion: struct {
+				ID int64 "json:\"id\""
+			}{ID: 1}}, nil)
 		return m
 	}())
 
@@ -101,7 +108,7 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			given: credentialService,
 			when: args{
 				ctx: context.Background(),
-				reg: newRegistrationMock("someone", "someone@email.com", "passwd12345678", "passwd12345678", "email"),
+				reg: newRegistrationMock("someone", "someone@email.com", "+6282312345678", "passwd12345678", "passwd12345678", "email"),
 			},
 			should: resp{
 				returnError: false,
@@ -113,7 +120,7 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			given: credentialService,
 			when: args{
 				ctx: context.Background(),
-				reg: newRegistrationMock("someone", "", "passwd12345678", "passwd12345678", "email"),
+				reg: newRegistrationMock("someone", "", "+6282312345678", "passwd12345678", "passwd12345678", "email"),
 			},
 			should: resp{
 				returnError:  true,
@@ -126,7 +133,7 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			given: credentialService,
 			when: args{
 				ctx: context.Background(),
-				reg: newRegistrationMock("someone", "i.am.not.an.email.com", "passwd12345678", "passwd12345678", "email"),
+				reg: newRegistrationMock("someone", "i.am.not.an.email.com", "+6282312345678", "passwd12345678", "passwd12345678", "email"),
 			},
 			should: resp{
 				returnError:  true,
@@ -135,11 +142,37 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			},
 		},
 		{
+			it:    "Should not be able to register when phone is empty",
+			given: credentialService,
+			when: args{
+				ctx: context.Background(),
+				reg: newRegistrationMock("someone", "someone@email.com", "", "passwd12345678", "passwd12345678", "email"),
+			},
+			should: resp{
+				returnError:  true,
+				returnedID:   -1,
+				errorMessage: "Please input a valid phone number",
+			},
+		},
+		{
+			it:    "Should not be able to register when phone is not in e164 format",
+			given: credentialService,
+			when: args{
+				ctx: context.Background(),
+				reg: newRegistrationMock("someone", "someone@email.com", "453546", "passwd12345678", "passwd12345678", "email"),
+			},
+			should: resp{
+				returnError:  true,
+				returnedID:   -1,
+				errorMessage: "Please input a valid phone number",
+			},
+		},
+		{
 			it:    "Should not be able to register when name is less than 2 characters",
 			given: credentialService,
 			when: args{
 				ctx: context.Background(),
-				reg: newRegistrationMock("n", "someone@email.com", "passwd12345678", "passwd12345678", "email"),
+				reg: newRegistrationMock("n", "someone@email.com", "+6282312345678", "passwd12345678", "passwd12345678", "email"),
 			},
 			should: resp{
 				returnError:  true,
@@ -152,7 +185,7 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			given: credentialService,
 			when: args{
 				ctx: context.Background(),
-				reg: newRegistrationMock("someone", "someone@email.com", "passw<8", "passw<8", "email"),
+				reg: newRegistrationMock("someone", "someone@email.com", "+6282312345678", "passw<8", "passw<8", "email"),
 			},
 			should: resp{
 				returnError:  true,
@@ -165,7 +198,7 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			given: credentialService,
 			when: args{
 				ctx: context.Background(),
-				reg: newRegistrationMock("someone", "someone@email.com", "passwd12345678", "passwdDoesntmatch", "email"),
+				reg: newRegistrationMock("someone", "someone@email.com", "+6282312345678", "passwd12345678", "passwdDoesntmatch", "email"),
 			},
 			should: resp{
 				returnError:  true,
@@ -178,7 +211,7 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			given: credentialService,
 			when: args{
 				ctx: context.Background(),
-				reg: newRegistrationMock("someone", "exists@email.com", "passwd12345678", "passwd12345678", "email"),
+				reg: newRegistrationMock("someone", "exists@email.com", "+6282312345678", "passwd12345678", "passwd12345678", "email"),
 			},
 			should: resp{
 				returnError:  true,
@@ -191,10 +224,12 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 		t.Run(tt.it, func(t *testing.T) {
 			got, err := tt.given.NewCustomer(tt.when.ctx, tt.when.reg)
 			if tt.should.returnError {
-				assert.Error(t, err, "Should return an error")
+				assert.Error(t, err, "should return an error")
 				if err != nil {
 					assert.Equal(t, tt.should.errorMessage, err.(*exception.Exception).Message, "error message does not match")
 				}
+			} else {
+				assert.Nil(t, err, "should not return an error")
 			}
 
 			assert.Equal(t, tt.should.returnedID, got, "returned id does not match")

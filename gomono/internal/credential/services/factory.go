@@ -11,7 +11,7 @@ import (
 type CredentialRepository interface {
 	FindCredentialByIdentity(context.Context, string) (*repositories.FindCredentialByIdentityResult, error)
 	CountCredentialByIdentity(context.Context, string) (int64, error)
-	CreateNewCustomer(ctx context.Context, identity, password, provider string) (*repositories.CreateNewCustomerMutationResult, error)
+	CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider string) (*repositories.CreateNewCustomerMutationResult, error)
 }
 
 type CredentialService struct {
