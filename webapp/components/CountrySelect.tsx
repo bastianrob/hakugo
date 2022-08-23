@@ -429,17 +429,22 @@ export const Countries: readonly CountryType[] = [
   {code: "ZW", label: "Zimbabwe", phone: "263"},
 ];
 
-export const CountrySelect: FC<TextFieldProps> = ({...props}) => {
+export type CountrySelectProp = Omit<TextFieldProps, "onChange"> &
+  Pick<
+    ComponentProps<typeof Autocomplete<CountryType, boolean, boolean, boolean>>,
+    "onChange"
+  >;
+
+export const CountrySelect: FC<CountrySelectProp> = ({onChange, ...props}) => {
   return (
     <Autocomplete<CountryType, boolean, boolean, boolean>
-      onChange={console.log}
-      options={Countries}
       autoHighlight
-      getOptionLabel={(option) => (option as CountryType).code}
+      options={Countries}
+      onChange={onChange}
       renderOption={(props, option) => (
         <Box
-          key={option.code}
           component="li"
+          key={option.code}
           sx={{"& > img": {mr: 2, flexShrink: 0}}}
           {...props}
         >
