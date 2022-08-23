@@ -1,17 +1,22 @@
 import CountrySelect, {CountryType} from "@/components/CountrySelect";
 import Spacer from "@/components/Spacer";
 import {extendedJoi, validationErrorToJson} from "@/libs/extendedJoi";
-import {formInputChangeToJson, formSubmitToJson} from "@/libs/formUtilities";
+import {
+  formInputChangeToJson,
+  formSubmitToJson,
+  formToJson,
+} from "@/libs/formUtilities";
 import {
   Button,
   Container,
+  Input,
   InputAdornment,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import {ValidationError} from "joi";
 import {NextPage} from "next";
+import {useRef} from "react";
 import {useState} from "react";
 
 const emptyCountry: CountryType = {label: "", code: "", phone: "0"};
@@ -35,82 +40,14 @@ const errorHelperInitialValue: errorHelper = {
 };
 
 const RegisterPage: NextPage = () => {
+  const formRef = useRef<HTMLFormElement>(null);
   const [countryType, setCountryType] = useState<CountryType>(emptyCountry);
   const [errorHelper, setErrorHelper] = useState<errorHelper>(
     errorHelperInitialValue,
   );
 
-  const validateInputChange = (key: string, value: any) => {
-    if (!key) return;
-
-    let validationError: ValidationError | undefined = undefined;
-    switch (key) {
-      case "name": {
-        const {error} = extendedJoi
-          .string()
-          .min(2)
-          .message("Name should be longer than 2 characters")
-          .required()
-          .validate(value);
-        validationError = error;
-        break;
-      }
-      case "email": {
-        const {error} = extendedJoi
-          .string()
-          .email({tlds: {allow: false}})
-          .message("Please input a valid email address")
-          .required()
-          .validate(value);
-        validationError = error;
-        break;
-      }
-      case "phone": {
-        const {error} = extendedJoi
-          .string()
-          .phoneNumber({
-            defaultCountry: countryType.code || undefined,
-            format: "e164",
-            strict: countryType.code ? true : false,
-          })
-          .message("Please input a valid phone number")
-          .validate(value);
-        validationError = error;
-        break;
-      }
-      case "password": {
-        const {error} = extendedJoi
-          .string()
-          .min(8)
-          .message("Password should be at least 8 characters long")
-          .required()
-          .validate(value);
-        validationError = error;
-        break;
-      }
-    }
-
-    if (!validationError) {
-      setErrorHelper({...errorHelper, [key]: ""});
-    } else {
-      const errorJson = validationErrorToJson(
-        errorHelper,
-        validationError,
-        key,
-      );
-      setErrorHelper(errorJson);
-    }
-  };
-
-  const submitForm = (data: any) => {
-    if (!countryType.code) {
-      setErrorHelper({
-        ...errorHelperInitialValue,
-        country: "Please input your phone number's country of origin",
-      });
-      return;
-    }
-
+  const validateForm = (data: any): undefined | any => {
+    console.log("val", data);
     const schema = extendedJoi.object({
       email: extendedJoi
         .string()
@@ -122,12 +59,15 @@ const RegisterPage: NextPage = () => {
         .min(2)
         .message("Name should be longer than 2 characters")
         .required(),
+      country: extendedJoi.string().required().messages({
+        "string.empty": "Please input your phone number's country of origin",
+      }),
       phone: extendedJoi
         .string()
         .phoneNumber({
-          defaultCountry: countryType.code || undefined,
           format: "e164",
-          strict: countryType.code ? true : false,
+          defaultCountry: data.country || undefined,
+          strict: true,
         })
         .message("Please input a valid phone number"),
       password: extendedJoi
@@ -151,25 +91,55 @@ const RegisterPage: NextPage = () => {
     if (error) {
       setErrorHelper(errorJson);
       return;
-    } else {
-      setErrorHelper(errorHelperInitialValue);
     }
 
-    // console.debug(value);
+    setErrorHelper(errorHelperInitialValue);
+    return value;
+  };
+
+  const submitForm = (data: any) => {
+    const validatedFormValue = validateForm(data);
+    if (!validatedFormValue) return;
   };
 
   const handleCountryChanged = (_: any, value: any) => {
-    if (value) setCountryType(value as CountryType);
-    else setCountryType(emptyCountry);
+    const data = formToJson(formRef.current!);
+    if (value) {
+      setCountryType(value);
+      validateForm({
+        ...data,
+        country: value.code,
+      });
+    } else {
+      setCountryType(emptyCountry);
+      validateForm({
+        ...data,
+        country: "",
+      });
+    }
+
+    // const data = formToJson(formRef.current!);
+  };
+
+  const canBeSubmitted = () => {
+    return (
+      !errorHelper.name &&
+      !errorHelper.email &&
+      !errorHelper.country &&
+      !errorHelper.phone &&
+      !errorHelper.password &&
+      !errorHelper.confirmation
+    );
   };
 
   return (
-    <Container maxWidth="sm" sx={{py: 2, textAlign: "center", height: "100%"}}>
+    <Container maxWidth="sm" className="shadow py-4 text-center h-full">
       <Stack textAlign="center" gap={2}>
         <Typography variant="h5">Sign Up</Typography>
 
         <form
-          onChange={formInputChangeToJson(validateInputChange)}
+          ref={formRef}
+          onChange={formInputChangeToJson(validateForm)}
           onSubmit={formSubmitToJson(submitForm)}
           className="[&>*]:mb-4"
         >
@@ -202,6 +172,8 @@ const RegisterPage: NextPage = () => {
             error={!!errorHelper.country}
             required
           />
+
+          <Input name="country" type="hidden" value={countryType.code} />
 
           <TextField
             id="phone"
@@ -247,7 +219,9 @@ const RegisterPage: NextPage = () => {
 
           <Spacer />
 
-          <Button type="submit">Sign Up</Button>
+          <Button disabled={!canBeSubmitted()} type="submit">
+            Sign Up
+          </Button>
         </form>
       </Stack>
     </Container>
