@@ -8,6 +8,8 @@ import {
   StyledEngineProvider,
   ThemeProvider,
 } from "@mui/material/styles";
+import {ApolloProvider} from "@apollo/client";
+import apolloClient from "@/libs/apolloClient";
 
 function MyApp({Component, pageProps}: AppProps) {
   const theme = createTheme({
@@ -35,12 +37,14 @@ function MyApp({Component, pageProps}: AppProps) {
 
   return (
     <StyledEngineProvider injectFirst={false}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </ThemeProvider>
+      <ApolloProvider client={apolloClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </ThemeProvider>
+      </ApolloProvider>
     </StyledEngineProvider>
   );
 }
