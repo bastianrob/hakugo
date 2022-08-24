@@ -1,0 +1,5 @@
+mutation CustomerRegister($input: CustomerRegistrationInput!) {
+  customerRegister(reg: $input) {
+    id
+  }
+}

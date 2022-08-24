@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# GraphQL generated codes
+graphql/generated.ts
+graphql/schema.json

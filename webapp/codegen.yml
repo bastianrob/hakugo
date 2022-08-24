@@ -1,0 +1,15 @@
+watch: true
+overwrite: true
+schema: ${APP_HOST_GQL:"http://localhost:8080/v1/graphql"}
+documents: "./graphql/**/*.graphql"
+generates:
+  graphql/generated.ts:
+    config:
+      withHooks: true
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+  graphql/schema.json:
+    plugins:
+      - "introspection"
