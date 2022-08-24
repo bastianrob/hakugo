@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/bastianrob/gomono/pkg/exception"
 	"github.com/bastianrob/gomono/pkg/global"
 	"github.com/labstack/echo/v4"
 )
@@ -55,7 +56,17 @@ func (cont *CredentialController) Register(e echo.Context) error {
 	}
 
 	id, err := cont.service.NewCustomer(e.Request().Context(), &payload.Data)
-	if err != nil || id <= 0 {
+	if exc, ok := exception.IsException(err); ok {
+		e.Logger().Error(exc.Message)
+		return e.JSON(http.StatusBadRequest, global.ErrorDTO{
+			Message: exc.Message,
+			Extensions: &global.ErrorExtension{
+				Code:  exc.Code,
+				Field: "$",
+			},
+		})
+	} else if err != nil {
+		e.Logger().Error(err)
 		return echo.ErrInternalServerError
 	}
 

@@ -45,7 +45,7 @@ func (repo *CredentialRepository) FindCredentialByIdentity(ctx context.Context, 
 	}
 
 	if len(resp.Credential) <= 0 {
-		return nil, exception.New(nil, "Credential Not Found")
+		return nil, exception.New(nil, "Credential Not Found", exception.CodeNotFound)
 	}
 
 	return resp, nil

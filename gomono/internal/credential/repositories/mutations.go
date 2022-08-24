@@ -35,6 +35,7 @@ func (repo *CredentialRepository) CreateNewCustomer(
 					identity: $identity,
 					password: $password,
 					provider: $provider,
+					banned: false
 					customer: {
 						data: {
 							name: $name,
@@ -68,7 +69,7 @@ func (repo *CredentialRepository) CreateNewCustomer(
 	}
 
 	if resp.Credential.ID <= 0 {
-		return nil, exception.New(nil, "Credential Not Found")
+		return nil, exception.New(nil, "Credential Not Found", exception.CodeNotFound)
 	}
 
 	return resp, nil
