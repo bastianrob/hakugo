@@ -31,16 +31,18 @@ actions:
           template: |-
             {
               "data": {
-                "name": {{$body.input.reg.username}},
+                "name": {{$body.input.reg.name}},
                 "email": {{$body.input.reg.email}},
                 "phone": {{$body.input.reg.phone}},
                 "password": {{$body.input.reg.password}},
                 "confirmation": {{$body.input.reg.confirmation}},
-                "provider": {{$body.input.arg1.provider}}
+                "provider": {{$body.input.reg.provider}}
               }
             }
         template_engine: Kriti
         version: 2
+    permissions:
+      - role: anonymous
     comment: customerRegister
   - name: partnerLogin
     definition:

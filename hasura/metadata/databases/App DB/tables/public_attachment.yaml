@@ -4,7 +4,14 @@ table:
 select_permissions:
   - role: anonymous
     permission:
-      columns: []
+      columns:
+        - id
+        - reference_id
+        - reference_table
+        - name
+        - mime_type
+        - size
+        - src
       filter: {}
   - role: customer
     permission:

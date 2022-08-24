@@ -22,21 +22,21 @@ type Registration interface {
 }
 
 // NewCustomer creates a new customer and returns its ID, otherwise returns -1 and error
-func (svc *CredentialService) NewCustomer(ctx context.Context, reg Registration) (int64, error) {
+func (svc *CredentialService) NewCustomer(ctx context.Context, reg Registration) (any, error) {
 	err := svc.validateRegistration(ctx, reg)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
 	hashedPassowrd, _ := hashPassword(reg.Password())
 	result, err := svc.repo.CreateNewCustomer(ctx, reg.Name(), reg.Identity(), reg.Phone(), hashedPassowrd, reg.Provider())
 	if err != nil {
 		logrus.Error(err)
-		return -1, exception.New(err, "Failed to create new customer", exception.CodeUnexpectedError)
+		return nil, exception.New(err, "Failed to create new customer", exception.CodeUnexpectedError)
 	}
 
 	svc.publishCustomerRegistrationStartedEvent(ctx, result)
-	return result.Credential.ID, nil
+	return result.Credential, nil
 }
 
 func (svc *CredentialService) validateRegistration(ctx context.Context, reg Registration) error {

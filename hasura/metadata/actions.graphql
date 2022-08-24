@@ -31,7 +31,14 @@ type LoginResponse {
   accessToken: String!
 }
 
-type CustomerRegistrationResponse {
-  id: Int!
+type Customer {
+  name: String
+  email: String
+  phone: String
 }
 
+type CustomerRegistrationResponse {
+  id: Int!
+  identity: String!
+  customer: Customer
+}

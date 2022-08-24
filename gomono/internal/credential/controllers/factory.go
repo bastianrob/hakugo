@@ -9,7 +9,7 @@ import (
 
 type CredentialService interface {
 	Authenticate(ctx context.Context, identity, password, role string) (string, error)
-	NewCustomer(ctx context.Context, reg credential.Registration) (int64, error)
+	NewCustomer(ctx context.Context, reg credential.Registration) (any, error)
 }
 
 type CredentialController struct {

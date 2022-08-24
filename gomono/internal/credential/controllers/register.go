@@ -42,10 +42,6 @@ func (r *RegisterRequest) Provider() string {
 	return r.Prov
 }
 
-type RegisterResponse struct {
-	ID int64 `json:"id"`
-}
-
 func (cont *CredentialController) Register(e echo.Context) error {
 	defer e.Request().Body.Close()
 
@@ -55,7 +51,7 @@ func (cont *CredentialController) Register(e echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Please provide a valid registration format")
 	}
 
-	id, err := cont.service.NewCustomer(e.Request().Context(), &payload.Data)
+	res, err := cont.service.NewCustomer(e.Request().Context(), &payload.Data)
 	if exc, ok := exception.IsException(err); ok {
 		e.Logger().Error(exc.Message)
 		return e.JSON(http.StatusBadRequest, global.ErrorDTO{
@@ -70,7 +66,5 @@ func (cont *CredentialController) Register(e echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return e.JSON(http.StatusCreated, RegisterResponse{
-		ID: id,
-	})
+	return e.JSON(http.StatusCreated, res)
 }

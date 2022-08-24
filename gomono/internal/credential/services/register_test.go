@@ -2,6 +2,7 @@ package credential
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
@@ -241,9 +242,12 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 				}
 			} else {
 				assert.Nil(t, err, "should not return an error")
+				assert.Equal(
+					t, tt.should.returnedID,
+					reflect.ValueOf(got).FieldByName("ID").Int(),
+					"returned id does not match",
+				)
 			}
-
-			assert.Equal(t, tt.should.returnedID, got, "returned id does not match")
 		})
 	}
 }

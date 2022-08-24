@@ -1,5 +1,11 @@
 mutation CustomerRegister($input: CustomerRegistrationInput!) {
   customerRegister(reg: $input) {
     id
+    identity
+    customer {
+      name
+      email
+      phone
+    }
   }
 }
