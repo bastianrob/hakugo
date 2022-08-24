@@ -18,6 +18,7 @@ import {
 import {useCustomerRegisterMutation} from "graphql/generated";
 import {NextPage} from "next";
 import {useRouter} from "next/router";
+import {useSnackbar} from "notistack";
 import {useRef} from "react";
 import {useState} from "react";
 
@@ -43,6 +44,8 @@ const errorHelperInitialValue: errorHelper = {
 
 const RegisterPage: NextPage = () => {
   const router = useRouter();
+  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
+
   const formRef = useRef<HTMLFormElement>(null);
   const [countryType, setCountryType] = useState<CountryType>(emptyCountry);
   const [errorHelper, setErrorHelper] = useState<errorHelper>(
@@ -106,15 +109,23 @@ const RegisterPage: NextPage = () => {
     if (!validatedFormValue) return;
 
     const {country, ...registrationInput} = validatedFormValue;
-    const {errors} = await register({
-      variables: {
-        input: {
-          ...registrationInput,
-          provider: "email",
+
+    try {
+      await register({
+        variables: {
+          input: {
+            ...registrationInput,
+            provider: "email",
+          },
         },
-      },
-    });
-    if (errors) return;
+      });
+    } catch (error) {
+      const snackId = enqueueSnackbar((error as Error).message, {
+        variant: "error",
+        onClick: () => closeSnackbar(snackId),
+      });
+      return;
+    }
 
     router.replace({
       pathname: "/register/confirmation",

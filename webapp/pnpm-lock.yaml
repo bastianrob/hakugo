@@ -24,6 +24,7 @@ specifiers:
   joi: ^17.6.0
   joi-phone-number: ^5.1.1
   next: 12.2.5
+  notistack: ^2.0.5
   postcss: ^8.4.16
   prettier: ^2.7.1
   react: 18.2.0
@@ -42,6 +43,7 @@ dependencies:
   joi: 17.6.0
   joi-phone-number: 5.1.1
   next: 12.2.5_twoewwu6sg7cdf3ao6njtbftne
+  notistack: 2.0.5_cc56alapomqwos3hjuzlsdnlam
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
 
@@ -4178,6 +4180,29 @@ packages:
     resolution: {integrity: sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==}
     engines: {node: '>=0.10.0'}
     dev: true
+
+  /notistack/2.0.5_cc56alapomqwos3hjuzlsdnlam:
+    resolution: {integrity: sha512-Ig2T1Muqkc1PaSQcEDrK7diKv6cBxw02Iq6uv074ySfgq524TV5lK41diAb6OSsaiWfp3aRt+T3+0MF8m2EcJQ==}
+    peerDependencies:
+      '@emotion/react': ^11.4.1
+      '@emotion/styled': ^11.3.0
+      '@mui/material': ^5.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@emotion/react':
+        optional: true
+      '@emotion/styled':
+        optional: true
+    dependencies:
+      '@emotion/react': 11.10.0_msmmgljd7hl2w2irtggflhmema
+      '@emotion/styled': 11.10.0_5sec57kzpgkzooe4crua5kfcly
+      '@mui/material': 5.10.1_sqzxty2p7kxc2tmue4tecplwku
+      clsx: 1.2.1
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    dev: false
 
   /nullthrows/1.1.1:
     resolution: {integrity: sha512-2vPPEi+Z7WqML2jZYddDIfy5Dqb0r2fze2zTxNNknZaFpVHU3mFB3R+DWeJWGVx0ecvttSGlJTI+WG+8Z4cDWw==}
