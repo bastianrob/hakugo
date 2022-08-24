@@ -15,7 +15,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import {useCustomerRegisterMutation} from "graphql/generated";
 import {NextPage} from "next";
+import {useRouter} from "next/router";
 import {useRef} from "react";
 import {useState} from "react";
 
@@ -40,14 +42,16 @@ const errorHelperInitialValue: errorHelper = {
 };
 
 const RegisterPage: NextPage = () => {
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [countryType, setCountryType] = useState<CountryType>(emptyCountry);
   const [errorHelper, setErrorHelper] = useState<errorHelper>(
     errorHelperInitialValue,
   );
 
+  const [register] = useCustomerRegisterMutation();
+
   const validateForm = (data: any): undefined | any => {
-    console.log("val", data);
     const schema = extendedJoi.object({
       email: extendedJoi
         .string()
@@ -97,9 +101,27 @@ const RegisterPage: NextPage = () => {
     return value;
   };
 
-  const submitForm = (data: any) => {
+  const submitForm = async (data: any) => {
     const validatedFormValue = validateForm(data);
     if (!validatedFormValue) return;
+
+    const {country, ...registrationInput} = validatedFormValue;
+    const {errors} = await register({
+      variables: {
+        input: {
+          ...registrationInput,
+          provider: "email",
+        },
+      },
+    });
+    if (errors) return;
+
+    router.replace({
+      pathname: "/register/confirmation",
+      query: {
+        email: validatedFormValue.email,
+      },
+    });
   };
 
   const handleCountryChanged = (_: any, value: any) => {
@@ -117,8 +139,6 @@ const RegisterPage: NextPage = () => {
         country: "",
       });
     }
-
-    // const data = formToJson(formRef.current!);
   };
 
   const canBeSubmitted = () => {

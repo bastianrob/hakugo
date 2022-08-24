@@ -17,7 +17,7 @@ pnpm install;     # install all dependencies
 Create `.env` file in the webapp worksapce directory
 
 ```bash
-APP_HOST_GQL={proto}://{host}:{port}/{path}     # GraphQL server host
+NEXT_PUBLIC_APP_HOST_GQL={proto}://{host}:{port}/{path}     # GraphQL server host
 ```
 
 ## Getting Started
