@@ -2,6 +2,7 @@ package credential
 
 import (
 	"context"
+	"time"
 
 	"github.com/bastianrob/gomono/internal/credential/configs"
 	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
@@ -13,7 +14,7 @@ import (
 type CredentialRepository interface {
 	FindCredentialByIdentity(context.Context, string) (*repositories.FindCredentialByIdentityResult, error)
 	CountCredentialByIdentity(context.Context, string) (int64, error)
-	CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider string) (*repositories.CreateNewCustomerMutationResult, error)
+	CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider, authCode string, authExpiry time.Time) (*repositories.CreateNewCustomerMutationResult, error)
 }
 
 type CredentialService struct {

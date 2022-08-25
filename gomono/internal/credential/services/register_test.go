@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
@@ -62,7 +63,7 @@ func (m *CredentialRepositoryMock) CountCredentialByIdentity(ctx context.Context
 	return int64(args.Int(0)), args.Error(1)
 }
 
-func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider string) (*repositories.CreateNewCustomerMutationResult, error) {
+func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider, code string, expiry time.Time) (*repositories.CreateNewCustomerMutationResult, error) {
 	args := m.Called(ctx, identity, password, provider)
 	return args.Get(0).(*repositories.CreateNewCustomerMutationResult), args.Error(1)
 }
@@ -85,16 +86,8 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			m := &CredentialRepositoryMock{}
 			m.On("CountCredentialByIdentity", mock.Anything, "exists@email.com").Return(1, nil)
 			m.On("CountCredentialByIdentity", mock.Anything, mock.Anything).Return(0, nil)
-			m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-				Return(&repositories.CreateNewCustomerMutationResult{Credential: struct {
-					ID       int64  `json:"id"`
-					Identity string `json:"identity"`
-					Customer struct {
-						Name  string `json:"name"`
-						Email string `json:"email"`
-						Phone string `json:"phone"`
-					} `json:"customer"`
-				}{ID: 1}}, nil)
+			m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+				Return(&repositories.CreateNewCustomerMutationResult{Credential: repositories.Credential{ID: 1}}, nil)
 			return m
 		}(),
 		nil,
@@ -274,15 +267,7 @@ func TestCredentialService_publishCustomerRegistrationStartedEvent(t *testing.T)
 		when: args{
 			ctx: context.Background(),
 			result: &repositories.CreateNewCustomerMutationResult{
-				Credential: struct {
-					ID       int64  `json:"id"`
-					Identity string `json:"identity"`
-					Customer struct {
-						Name  string `json:"name"`
-						Email string `json:"email"`
-						Phone string `json:"phone"`
-					} `json:"customer"`
-				}{
+				Credential: repositories.Credential{
 					ID: 1000,
 				},
 			},
