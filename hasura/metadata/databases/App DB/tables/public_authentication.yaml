@@ -1,0 +1,7 @@
+table:
+  name: authentication
+  schema: public
+object_relationships:
+  - name: credential
+    using:
+      foreign_key_constraint_on: credential_id

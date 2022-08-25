@@ -72,5 +72,6 @@ custom_types:
     - name: CustomerRegistrationInput
   objects:
     - name: LoginResponse
+    - name: Customer
     - name: CustomerRegistrationResponse
   scalars: []

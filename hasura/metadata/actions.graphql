@@ -42,3 +42,4 @@ type CustomerRegistrationResponse {
   identity: String!
   customer: Customer
 }
+
