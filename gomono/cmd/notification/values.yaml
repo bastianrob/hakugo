@@ -1,0 +1,81 @@
+replicaCount: 1
+containerPort: 3001
+
+image:
+  repository: notification-service
+  pullPolicy: Never
+  tag: ${IMAGE_TAG:latest}
+
+imagePullSecrets: []
+nameOverride: "notification-service"
+fullnameOverride: "notification-service"
+
+service:
+  type: ClusterIP
+  port: 3001
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+secret:
+  APP_JWT_SECRET: ${APP_JWT_SECRET}
+  APP_GQL_AUTH_SECRET: ${APP_GQL_AUTH_SECRET}
+
+configmap:
+  PORT: "3001"
+  NAME: "notification-service"
+  APP_GQL_HOST: ${APP_GQL_HOST}
+  APP_GQL_AUTH_HEADER: ${APP_GQL_AUTH_HEADER}
+
+env:
+  - name: PORT
+    valueFrom:
+      configMapKeyRef:
+        name: notification-service-configmap
+        key: PORT
+        optional: false
+  - name: NAME
+    valueFrom:
+      configMapKeyRef:
+        name: notification-service-configmap
+        key: NAME
+        optional: false
+  - name: APP_GQL_HOST
+    valueFrom:
+      configMapKeyRef:
+        name: notification-service-configmap
+        key: APP_GQL_HOST
+        optional: false
+  - name: APP_GQL_AUTH_HEADER
+    valueFrom:
+      configMapKeyRef:
+        name: notification-service-configmap
+        key: APP_GQL_AUTH_HEADER
+        optional: false
+  - name: APP_JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: notification-service-secret
+        key: APP_JWT_SECRET
+        optional: false
+  - name: APP_GQL_AUTH_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: notification-service-secret
+        key: APP_GQL_AUTH_SECRET
+        optional: false
