@@ -1,18 +1,26 @@
 package notification
 
-import "github.com/go-redis/redis/v9"
+import (
+	"github.com/go-redis/redis/v9"
+	"github.com/mailjet/mailjet-apiv3-go"
+)
 
 type Subscription interface {
 	CustomerRegistrationStarted() <-chan *redis.Message
 }
 
 type NotificationService struct {
-	subscription Subscription
+	subscription  Subscription
+	mailjetClient mailjet.ClientInterface
 }
 
-func NewNotificationService(subscription Subscription) *NotificationService {
+func NewNotificationService(
+	subscription Subscription,
+	mailjetClient mailjet.ClientInterface,
+) *NotificationService {
 	svc := &NotificationService{
-		subscription: subscription,
+		subscription:  subscription,
+		mailjetClient: mailjetClient,
 	}
 
 	return svc

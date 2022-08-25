@@ -18,6 +18,10 @@ type AppConfig struct {
 		Pass string `env:"APP_REDIS_PASS,required,notEmpty"`
 		DB   int    `env:"APP_REDIS_DB,required,notEmpty"`
 	}
+	Mailjet struct {
+		APIKey string `env:"APP_MAILJET_APIKEY,required,notEmpty"`
+		Secret string `env:"APP_MAILJET_SECRET,required,notEmpty"`
+	}
 }
 
 var App *AppConfig

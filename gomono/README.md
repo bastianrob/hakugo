@@ -14,5 +14,10 @@ helm template {service-name} ./gomono -f ./cmd/{service}/values.yaml \
   --set secret.APP_GQL_AUTH_SECRET="" \
   --set configmap.APP_GQL_HOST="" \
   --set configmap.APP_GQL_AUTH_HEADER="" \
+  --set configmap.APP_REDIS_HOST="" \
+  --set configmap.APP_REDIS_PASS="" \
+  --set configmap.APP_REDIS_DB="" \
+  --set configmap.APP_MAILJET_APIKEY="" \
+  --set configmap.APP_MAILJET_SECRET="" \
   --set image.tag="";
 ```

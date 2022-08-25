@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/mailjet/mailjet-apiv3-go"
 )
 
 func init() {
@@ -44,8 +45,9 @@ func main() {
 		ReadTimeout: -1,
 	})
 
+	mailjetClient := mailjet.NewMailjetClient(configs.App.Mailjet.APIKey, configs.App.Mailjet.Secret)
 	redisSubscriber := notifRepo.NewRedisSubscriber(redisClient)
-	notifService := notification.NewNotificationService(redisSubscriber)
+	notifService := notification.NewNotificationService(redisSubscriber, mailjetClient)
 	notifService.Run()
 
 	// Start server
