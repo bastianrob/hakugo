@@ -26,7 +26,9 @@ func (svc *CredentialService) Verify(ctx context.Context, code string) error {
 	}
 
 	// 3. Set the auth as used
-	// TODO svc.repo.SetAuthenticationAsUsed(ctx, auth.ID)
+	if _, exc := svc.repo.SetAuthenticationAsUsed(ctx, auth.ID); err != nil {
+		return exc
+	}
 
 	return nil
 }

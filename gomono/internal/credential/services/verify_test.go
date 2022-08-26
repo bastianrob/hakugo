@@ -21,6 +21,16 @@ func (m *CredentialRepositoryMock) FindAuthenticationByCode(ctx context.Context,
 	return nil, args.Error(1)
 }
 
+func (m *CredentialRepositoryMock) SetAuthenticationAsUsed(ctx context.Context, authID int64) (*schema.Authentication, error) {
+	args := m.Called(ctx, authID)
+	auth, ok := args.Get(0).(*schema.Authentication)
+	if ok {
+		return auth, args.Error(1)
+	}
+
+	return nil, args.Error(1)
+}
+
 func TestCredentialService_Verify(t *testing.T) {
 	now := time.Now()
 	tomorrow := now.Add(24 * time.Hour)
@@ -33,6 +43,7 @@ func TestCredentialService_Verify(t *testing.T) {
 			m.On("FindAuthenticationByCode", mock.Anything, "EXPIRED-CODE-4567890").Return(&schema.Authentication{ExpiredAt: yesterday}, nil)
 			m.On("FindAuthenticationByCode", mock.Anything, "USEDALR-CODE-4567890").Return(&schema.Authentication{ExpiredAt: tomorrow, Used: true}, nil)
 			m.On("FindAuthenticationByCode", mock.Anything, "INVALID-CODE-4567890").Return(nil, exception.New(nil, "NOT FOUND", exception.CodeNotFound))
+			m.On("SetAuthenticationAsUsed", mock.Anything, mock.Anything).Return(&schema.Authentication{}, nil)
 			return m
 		}(),
 		nil,

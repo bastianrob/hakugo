@@ -75,3 +75,27 @@ func (repo *CredentialRepository) CreateNewCustomer(ctx context.Context, input s
 
 	return resp, nil
 }
+
+func (repo *CredentialRepository) SetAuthenticationAsUsed(ctx context.Context, authID int64) (*schema.Authentication, error) {
+	query := graphql.NewRequest(`
+	mutation updateAuthentication($id: bigint!) {
+		authentication: update_authentication_by_pk(
+			pk_columns: { id: $id },
+			_set: { used: true }
+		) {
+			used
+		}
+	}`)
+
+	query.Header.Add(configs.App.GraphQL.AuthHeader, configs.App.GraphQL.AuthSecret)
+	query.Var("id", authID)
+
+	resp := &struct {
+		Authentication *schema.Authentication `json:"authentication"`
+	}{}
+	if err := repo.gqlClient.Run(ctx, query, resp); err != nil || resp.Authentication == nil || !resp.Authentication.Used {
+		return nil, exception.New(err, "Failed to updated authentication code", exception.CodeUnexpectedError)
+	}
+
+	return resp.Authentication, nil
+}
