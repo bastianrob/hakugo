@@ -2,6 +2,7 @@ package configs
 
 import (
 	"github.com/caarlos0/env/v6"
+	"github.com/sirupsen/logrus"
 )
 
 type AppConfig struct {
@@ -15,8 +16,8 @@ type AppConfig struct {
 	}
 	Redis struct {
 		Host string `env:"APP_REDIS_HOST,required,notEmpty"`
-		Pass string `env:"APP_REDIS_PASS,required,notEmpty"`
-		DB   int    `env:"APP_REDIS_DB,required,notEmpty"`
+		Pass string `env:"APP_REDIS_PASS"`
+		DB   int    `env:"APP_REDIS_DB,required,notEmpty" envDefault:"0"`
 	}
 	Mailjet struct {
 		APIKey string `env:"APP_MAILJET_APIKEY,required,notEmpty"`
@@ -28,5 +29,8 @@ var App *AppConfig
 
 func Init() {
 	App = &AppConfig{}
-	env.Parse(App)
+	err := env.Parse(App)
+	if err != nil {
+		logrus.Panicf("Failed to parse env: %+v", err)
+	}
 }

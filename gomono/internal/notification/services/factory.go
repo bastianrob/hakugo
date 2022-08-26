@@ -11,12 +11,12 @@ type Subscription interface {
 
 type NotificationService struct {
 	subscription  Subscription
-	mailjetClient mailjet.ClientInterface
+	mailjetClient *mailjet.Client
 }
 
 func NewNotificationService(
 	subscription Subscription,
-	mailjetClient mailjet.ClientInterface,
+	mailjetClient *mailjet.Client,
 ) *NotificationService {
 	svc := &NotificationService{
 		subscription:  subscription,
@@ -27,5 +27,5 @@ func NewNotificationService(
 }
 
 func (svc *NotificationService) Run() {
-	go consumeCustomerRegistrationStarted(svc.subscription.CustomerRegistrationStarted())
+	go svc.consumeCustomerRegistrationStarted(svc.subscription.CustomerRegistrationStarted())
 }

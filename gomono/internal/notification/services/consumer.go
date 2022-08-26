@@ -1,10 +1,13 @@
 package notification
 
 import (
+	"bytes"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v9"
+	"github.com/mailjet/mailjet-apiv3-go"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,19 +24,46 @@ type CustomerRegistrationStartedEvent struct {
 		Code      string    `json:"code"`
 		CreatedAt time.Time `json:"created_at"`
 		ExpiredAt time.Time `json:"expired_at"`
-	}
+	} `json:"authentications"`
 }
 
-func consumeCustomerRegistrationStarted(ch <-chan *redis.Message) {
+func (svc *NotificationService) consumeCustomerRegistrationStarted(ch <-chan *redis.Message) {
 	for message := range ch {
 		registrationEvent := CustomerRegistrationStartedEvent{}
 		if err := json.Unmarshal([]byte(message.Payload), &registrationEvent); err != nil {
-			logrus.Errorf("%w", err)
+			logrus.Errorf("%s", err)
 			continue
 		}
 
-		logrus.Infof("%+v", registrationEvent)
+		buffer := bytes.Buffer{}
+		mailVerificationTemplate.Execute(&buffer, MailVerificationTemplate{
+			Name:  registrationEvent.Customer.Name,
+			Email: registrationEvent.Customer.Email,
+			Code:  registrationEvent.Authentications[0].Code,
+			Host:  "http://localhost",
+		})
 
-		// TODO: handle registration event
+		mailBody := strings.TrimSpace(strings.ReplaceAll(buffer.String(), "\t", ""))
+		messagesInfo := []mailjet.InfoMessagesV31{
+			{
+				From: &mailjet.RecipientV31{
+					Email: "hello@bastianrob.xyz",
+					Name:  "Robin's Email Bot",
+				},
+				To: &mailjet.RecipientsV31{
+					mailjet.RecipientV31{
+						Email: registrationEvent.Customer.Email,
+						Name:  registrationEvent.Customer.Name,
+					},
+				},
+				Subject:  "Verify Your Email",
+				TextPart: mailBody,
+			},
+		}
+		messages := &mailjet.MessagesV31{Info: messagesInfo}
+		_, err := svc.mailjetClient.SendMailV31(messages)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
 }
