@@ -74,3 +74,38 @@ func (repo *CredentialRepository) CountCredentialByIdentity(ctx context.Context,
 
 	return resp.Credential.Aggregate.Count, nil
 }
+
+// FindAuthenticationByCode returns error if not found
+func (repo *CredentialRepository) FindAuthenticationByCode(ctx context.Context, code string) (*schema.Authentication, error) {
+	query := graphql.NewRequest(`
+		query findAuthenticationByCode($where: authentication_bool_exp) {
+      	authentications: authentication(limit: 1, where: $where) {
+				id
+				created_at
+				expired_at
+				code
+				used
+			}
+		}	
+	`)
+
+	query.Header.Add(configs.App.GraphQL.AuthHeader, configs.App.GraphQL.AuthSecret)
+	query.Var("where", map[string]any{
+		"code": map[string]any{
+			"_eq": code,
+		},
+	})
+
+	resp := &struct {
+		Authentications []schema.Authentication `json:"authentications"`
+	}{}
+	if err := repo.gqlClient.Run(ctx, query, resp); err != nil {
+		return nil, err
+	}
+
+	if len(resp.Authentications) <= 0 {
+		return nil, exception.New(nil, "Authentication code does not exists", exception.CodeNotFound)
+	}
+
+	return &resp.Authentications[0], nil
+}

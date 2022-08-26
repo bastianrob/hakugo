@@ -7,9 +7,12 @@ require (
 	github.com/caarlos0/env/v6 v6.9.3
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
+	github.com/google/go-cmp v0.5.8
+	github.com/jaevor/go-nanoid v1.2.0
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.8.0
 	github.com/machinebox/graphql v0.2.2
+	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 )
 
 require (
@@ -18,9 +21,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/jaevor/go-nanoid v1.2.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9 // indirect
 )

@@ -17,6 +17,7 @@ type Authentication struct {
 	Code      string    `json:"code,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	ExpiredAt time.Time `json:"expired_at,omitempty"`
+	Used      bool      `json:"used,omitempty"`
 }
 
 type Customer struct {
