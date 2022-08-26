@@ -51,6 +51,7 @@ func (m *RegistrationMock) Provider() string {
 
 type CredentialRepositoryMock struct {
 	mock.Mock
+	CredentialRepository
 }
 
 func (m *CredentialRepositoryMock) FindCredentialByIdentity(ctx context.Context, identity string) (*repositories.FindCredentialByIdentityResult, error) {
