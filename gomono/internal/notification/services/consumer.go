@@ -3,7 +3,6 @@ package notification
 import (
 	"bytes"
 	"encoding/json"
-	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v9"
@@ -43,7 +42,6 @@ func (svc *NotificationService) consumeCustomerRegistrationStarted(ch <-chan *re
 			Host:  "http://localhost",
 		})
 
-		mailBody := strings.TrimSpace(strings.ReplaceAll(buffer.String(), "\t", ""))
 		messagesInfo := []mailjet.InfoMessagesV31{
 			{
 				From: &mailjet.RecipientV31{
@@ -57,7 +55,7 @@ func (svc *NotificationService) consumeCustomerRegistrationStarted(ch <-chan *re
 					},
 				},
 				Subject:  "Verify Your Email",
-				TextPart: mailBody,
+				HTMLPart: buffer.String(),
 			},
 		}
 		messages := &mailjet.MessagesV31{Info: messagesInfo}
