@@ -2,47 +2,18 @@ package credential
 
 import (
 	"context"
-	"time"
 
 	"github.com/bastianrob/gomono/internal/credential/configs"
 	"github.com/bastianrob/gomono/pkg/exception"
+	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/machinebox/graphql"
 )
 
-type Credential struct {
-	ID              int64            `json:"id"`
-	Identity        string           `json:"identity"`
-	Customer        Customer         `json:"customer"`
-	Authentications []Authentication `json:"authentications"`
-}
-
-type Authentication struct {
-	ID        int64     `json:"id"`
-	Code      string    `json:"code"`
-	CreatedAt time.Time `json:"created_at"`
-	ExpiredAt time.Time `json:"expired_at"`
-}
-
-type Customer struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
-}
-
 type CreateNewCustomerMutationResult struct {
-	Credential Credential `json:"credential"`
+	Credential schema.Credential `json:"credential"`
 }
 
-func (repo *CredentialRepository) CreateNewCustomer(
-	ctx context.Context,
-	name,
-	identity,
-	phone,
-	password,
-	provider,
-	authCode string,
-	authExpiry time.Time,
-) (*CreateNewCustomerMutationResult, error) {
+func (repo *CredentialRepository) CreateNewCustomer(ctx context.Context, input schema.CustomerRegisterInput) (*CreateNewCustomerMutationResult, error) {
 	query := graphql.NewRequest(`
 	mutation createNewCustomer(
 		$name: String!, $identity: String!, $phone: String!, $password: String!, $provider: String!,
@@ -85,13 +56,13 @@ func (repo *CredentialRepository) CreateNewCustomer(
 	}`)
 
 	query.Header.Add(configs.App.GraphQL.AuthHeader, configs.App.GraphQL.AuthSecret)
-	query.Var("name", name)
-	query.Var("identity", identity)
-	query.Var("phone", phone)
-	query.Var("password", password)
-	query.Var("provider", provider)
-	query.Var("authCode", authCode)
-	query.Var("authExpiry", authExpiry)
+	query.Var("name", input.Name)
+	query.Var("identity", input.Identity)
+	query.Var("phone", input.Phone)
+	query.Var("password", input.Password)
+	query.Var("provider", input.Provider)
+	query.Var("authCode", input.AuthCode)
+	query.Var("authExpiry", input.AuthExpiry)
 
 	resp := &CreateNewCustomerMutationResult{}
 	if err := repo.gqlClient.Run(ctx, query, resp); err != nil {

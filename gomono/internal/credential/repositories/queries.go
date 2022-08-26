@@ -5,19 +5,12 @@ import (
 
 	"github.com/bastianrob/gomono/internal/credential/configs"
 	"github.com/bastianrob/gomono/pkg/exception"
+	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/machinebox/graphql"
 )
 
 type FindCredentialByIdentityResult struct {
-	Credential []struct {
-		ID       int64  `json:"id"`
-		Identity string `json:"identity"`
-		Password string `json:"password"`
-		Banned   bool   `json:"banned"`
-		Partners []struct {
-			ID int64 `json:"id"`
-		} `json:"partners"`
-	} `json:"credential"`
+	Credential []schema.Credential `json:"credential"`
 }
 
 // findCredentialByIdentity return error if not found

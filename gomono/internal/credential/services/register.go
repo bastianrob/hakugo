@@ -10,6 +10,7 @@ import (
 	"github.com/bastianrob/gomono/pkg/exception"
 	"github.com/bastianrob/gomono/pkg/global"
 	"github.com/bastianrob/gomono/pkg/global/idgen"
+	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,15 +33,15 @@ func (svc *CredentialService) NewCustomer(ctx context.Context, reg Registration)
 	authCode := idgen.AlphaNum20U()
 	authExpiry := time.Now().Add(24 * time.Hour)
 	hashedPassowrd, _ := hashPassword(reg.Password())
-	result, err := svc.repo.CreateNewCustomer(ctx,
-		reg.Name(),
-		reg.Identity(),
-		reg.Phone(),
-		hashedPassowrd,
-		reg.Provider(),
-		authCode,
-		authExpiry,
-	)
+	result, err := svc.repo.CreateNewCustomer(ctx, schema.CustomerRegisterInput{
+		Name:       reg.Name(),
+		Identity:   reg.Identity(),
+		Phone:      reg.Phone(),
+		Provider:   reg.Provider(),
+		Password:   hashedPassowrd,
+		AuthCode:   authCode,
+		AuthExpiry: authExpiry,
+	})
 	if err != nil {
 		logrus.Error(err)
 		return nil, exception.New(err, "Failed to create new customer", exception.CodeUnexpectedError)

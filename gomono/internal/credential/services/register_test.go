@@ -4,11 +4,11 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
 	"github.com/bastianrob/gomono/pkg/exception"
+	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/go-redis/redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -63,8 +63,8 @@ func (m *CredentialRepositoryMock) CountCredentialByIdentity(ctx context.Context
 	return int64(args.Int(0)), args.Error(1)
 }
 
-func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider, code string, expiry time.Time) (*repositories.CreateNewCustomerMutationResult, error) {
-	args := m.Called(ctx, identity, password, provider)
+func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, input schema.CustomerRegisterInput) (*repositories.CreateNewCustomerMutationResult, error) {
+	args := m.Called(ctx, input)
 	return args.Get(0).(*repositories.CreateNewCustomerMutationResult), args.Error(1)
 }
 
@@ -87,7 +87,7 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			m.On("CountCredentialByIdentity", mock.Anything, "exists@email.com").Return(1, nil)
 			m.On("CountCredentialByIdentity", mock.Anything, mock.Anything).Return(0, nil)
 			m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-				Return(&repositories.CreateNewCustomerMutationResult{Credential: repositories.Credential{ID: 1}}, nil)
+				Return(&repositories.CreateNewCustomerMutationResult{Credential: schema.Credential{ID: 1}}, nil)
 			return m
 		}(),
 		nil,
@@ -267,7 +267,7 @@ func TestCredentialService_publishCustomerRegistrationStartedEvent(t *testing.T)
 		when: args{
 			ctx: context.Background(),
 			result: &repositories.CreateNewCustomerMutationResult{
-				Credential: repositories.Credential{
+				Credential: schema.Credential{
 					ID: 1000,
 				},
 			},
