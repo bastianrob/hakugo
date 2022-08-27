@@ -81,6 +81,7 @@ func (repo *CredentialRepository) FindAuthenticationByCode(ctx context.Context, 
 		query findAuthenticationByCode($where: authentication_bool_exp) {
       	authentications: authentication(limit: 1, where: $where) {
 				id
+				credential_id
 				created_at
 				expired_at
 				code

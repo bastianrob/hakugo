@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func generateAuthToken(now time.Time, userID string, partnerID int64, identity, role string) (string, error) {
+func generateAuthToken(now time.Time, credentialID string, partnerID int64, identity, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, StandardClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    global.Config.Name,
@@ -18,7 +18,7 @@ func generateAuthToken(now time.Time, userID string, partnerID int64, identity, 
 			Audience:  []string{},
 			ExpiresAt: jwt.NewNumericDate(now.Add(24 * 7 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(now),
-			ID:        userID,
+			ID:        credentialID,
 		},
 		Claims: HasuraCustomClaims{
 			AllowedRoles: []string{"customer", "partner", "anonymous"},

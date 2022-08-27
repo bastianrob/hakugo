@@ -10,6 +10,7 @@ import (
 type CredentialService interface {
 	Authenticate(ctx context.Context, identity, password, role string) (string, error)
 	NewCustomer(ctx context.Context, reg credential.Registration) (any, error)
+	Verify(ctx context.Context, email, code string) (string, error)
 }
 
 type CredentialController struct {

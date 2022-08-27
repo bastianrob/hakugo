@@ -5,7 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bastianrob/gomono/internal/credential/configs"
 	"github.com/bastianrob/gomono/pkg/exception"
+	"github.com/bastianrob/gomono/pkg/global"
 	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -35,6 +37,8 @@ func TestCredentialService_Verify(t *testing.T) {
 	now := time.Now()
 	tomorrow := now.Add(24 * time.Hour)
 	yesterday := now.AddDate(0, 0, -1)
+	configs.Init()
+	global.Init()
 
 	credentialService := NewCredentialService(
 		func() *CredentialRepositoryMock {
@@ -50,8 +54,9 @@ func TestCredentialService_Verify(t *testing.T) {
 	)
 
 	type args struct {
-		ctx  context.Context
-		code string
+		ctx   context.Context
+		code  string
+		email string
 	}
 	type should struct {
 		returnErr bool
@@ -66,8 +71,9 @@ func TestCredentialService_Verify(t *testing.T) {
 			it:    "Should not return error when code is valid",
 			given: credentialService,
 			when: args{
-				ctx:  context.Background(),
-				code: "CORRECT-CODE-4567890",
+				ctx:   context.Background(),
+				code:  "CORRECT-CODE-4567890",
+				email: "mail@mail.mail",
 			},
 			should: should{
 				returnErr: false,
@@ -77,8 +83,9 @@ func TestCredentialService_Verify(t *testing.T) {
 			it:    "Should return error when code is NOT valid",
 			given: credentialService,
 			when: args{
-				ctx:  context.Background(),
-				code: "INVALID-CODE-4567890",
+				ctx:   context.Background(),
+				code:  "INVALID-CODE-4567890",
+				email: "mail@mail.mail",
 			},
 			should: should{
 				returnErr: true,
@@ -88,8 +95,9 @@ func TestCredentialService_Verify(t *testing.T) {
 			it:    "Should return error when code is expired",
 			given: credentialService,
 			when: args{
-				ctx:  context.Background(),
-				code: "EXPIRED-CODE-4567890",
+				ctx:   context.Background(),
+				code:  "EXPIRED-CODE-4567890",
+				email: "mail@mail.mail",
 			},
 			should: should{
 				returnErr: true,
@@ -99,8 +107,9 @@ func TestCredentialService_Verify(t *testing.T) {
 			it:    "Should return error when code is used already",
 			given: credentialService,
 			when: args{
-				ctx:  context.Background(),
-				code: "USEDALR-CODE-4567890",
+				ctx:   context.Background(),
+				code:  "USEDALR-CODE-4567890",
+				email: "mail@mail.mail",
 			},
 			should: should{
 				returnErr: true,
@@ -109,11 +118,13 @@ func TestCredentialService_Verify(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.it, func(t *testing.T) {
-			err := tt.given.Verify(tt.when.ctx, tt.when.code)
+			token, err := tt.given.Verify(tt.when.ctx, tt.when.email, tt.when.code)
 			if tt.should.returnErr {
 				assert.Error(t, err)
+				assert.Empty(t, token)
 			} else {
 				assert.NoError(t, err)
+				assert.NotEmpty(t, token)
 			}
 		})
 	}

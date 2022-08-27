@@ -1,4 +1,26 @@
 actions:
+  - name: authenticationVerify
+    definition:
+      kind: synchronous
+      handler: '{{HOST_CREDENTIAL_SERVICE}}/verify'
+      timeout: 10
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "data": {
+                "code": {{$body.input.code}},
+                "email": {{$body.input.email}}
+              }
+            }
+        template_engine: Kriti
+        version: 2
+    permissions:
+      - role: partner
+      - role: customer
+      - role: anonymous
+    comment: Verify authentication code
   - name: customerLogin
     definition:
       kind: synchronous

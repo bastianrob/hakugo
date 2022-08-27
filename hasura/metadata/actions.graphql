@@ -1,4 +1,11 @@
 type Mutation {
+  authenticationVerify(
+    email: String!
+    code: String!
+  ): LoginResponse
+}
+
+type Mutation {
   customerLogin(
     user: String!
     pass: String!
