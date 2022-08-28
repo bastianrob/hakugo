@@ -1,4 +1,4 @@
-mutation CustomerRegister($input: CustomerRegistrationInput!) {
+mutation customerRegister($input: CustomerRegistrationInput!) {
   customerRegister(reg: $input) {
     id
     identity

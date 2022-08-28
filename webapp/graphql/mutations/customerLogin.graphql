@@ -1,0 +1,5 @@
+mutation customerLogin($user: String!, $pass: String!) {
+  customerLogin(user: $user, pass: $pass) {
+    accessToken
+  }
+}
