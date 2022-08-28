@@ -9,6 +9,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import {setCookie} from "cookies-next";
 import {
   AuthenticationVerifyDocument,
   AuthenticationVerifyMutation,
@@ -105,9 +106,11 @@ export const getServerSideProps = async (
         variables: {email, code},
       });
 
-      // TODO: get accessToken and automatically login
-      console.log(data?.authenticationVerify?.accessToken);
       verificationState = "already_verified";
+      setCookie("access-token", data?.authenticationVerify?.accessToken, {
+        req: context.req,
+        res: context.res,
+      });
     } catch (error: any) {
       const {graphQLErrors, networkError} = error as {
         graphQLErrors?: GraphQLErrors;
@@ -128,10 +131,8 @@ export const getServerSideProps = async (
             verificationState = "unexpected_error";
             break;
           case "EXPIRED":
-            verificationState = "already_expired";
-            break;
           case "USED":
-            verificationState = "already_verified";
+            verificationState = "already_expired";
             break;
         }
       } else if (networkError) {

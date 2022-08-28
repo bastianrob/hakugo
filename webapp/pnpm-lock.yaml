@@ -17,6 +17,7 @@ specifiers:
   '@types/react': 18.0.17
   '@types/react-dom': 18.0.6
   autoprefixer: ^10.4.8
+  cookies-next: ^2.1.1
   eslint: 8.22.0
   eslint-config-next: 12.2.5
   graphql: ^16.6.0
@@ -39,6 +40,7 @@ dependencies:
   '@emotion/styled': 11.10.0_5sec57kzpgkzooe4crua5kfcly
   '@mui/icons-material': 5.8.4_uxiimzjvigalxf5okfzuivgjva
   '@mui/material': 5.10.1_sqzxty2p7kxc2tmue4tecplwku
+  cookies-next: 2.1.1
   graphql: 16.6.0
   graphql-tag: 2.12.6_graphql@16.6.0
   joi: 17.6.0
@@ -1757,6 +1759,10 @@ packages:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
 
+  /@types/cookie/0.4.1:
+    resolution: {integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==}
+    dev: false
+
   /@types/joi-phone-number/5.0.4:
     resolution: {integrity: sha512-NzgSN2Zxwgb5RPERuuHnBLdoGk9SPgcaUG1sWCQklwr92FWeNI//9DPWE33qEv+xGAM1xcSiW9gxn3+UCKDYxw==}
     dependencies:
@@ -1784,6 +1790,10 @@ packages:
     dependencies:
       '@types/node': 18.7.9
     dev: true
+
+  /@types/node/16.11.56:
+    resolution: {integrity: sha512-aFcUkv7EddxxOa/9f74DINReQ/celqH8DiB3fRYgVDM2Xm5QJL8sl80QKuAnGvwAsMn+H3IFA6WCrQh1CY7m1A==}
+    dev: false
 
   /@types/node/18.7.9:
     resolution: {integrity: sha512-0N5Y1XAdcl865nDdjbO0m3T6FdmQ4ijE89/urOHLREyTXbpMWbSafx9y7XIsgWGtwUP2iYTinLyyW3FatAxBLQ==}
@@ -2486,6 +2496,19 @@ packages:
     resolution: {integrity: sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==}
     dependencies:
       safe-buffer: 5.1.2
+
+  /cookie/0.4.2:
+    resolution: {integrity: sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==}
+    engines: {node: '>= 0.6'}
+    dev: false
+
+  /cookies-next/2.1.1:
+    resolution: {integrity: sha512-AZGZPdL1hU3jCjN2UMJTGhLOYzNUN9Gm+v8BdptYIHUdwz397Et1p+sZRfvAl8pKnnmMdX2Pk9xDRKCGBum6GA==}
+    dependencies:
+      '@types/cookie': 0.4.1
+      '@types/node': 16.11.56
+      cookie: 0.4.2
+    dev: false
 
   /copy-to-clipboard/3.3.2:
     resolution: {integrity: sha512-Vme1Z6RUDzrb6xAI7EZlVZ5uvOk2F//GaxKUxajDqm9LhOVM1inxNAD2vy+UZDYsd0uyA9s7b3/FVZPSxqrCfg==}
