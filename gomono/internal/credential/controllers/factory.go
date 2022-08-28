@@ -32,4 +32,5 @@ func (cont *CredentialController) Routes(e *echo.Echo) {
 	e.GET("/", cont.Healthcheck)
 	e.POST("/authenticate", cont.Authenticate)
 	e.POST("/register", cont.Register)
+	e.POST("/verify", cont.AuthenticationVerify)
 }

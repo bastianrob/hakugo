@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/bastianrob/gomono/pkg/exception"
 	"github.com/bastianrob/gomono/pkg/global"
 	"github.com/labstack/echo/v4"
 )
@@ -23,7 +24,15 @@ func (cont *CredentialController) AuthenticationVerify(e echo.Context) error {
 	}
 
 	token, err := cont.service.Verify(e.Request().Context(), payload.Data.Email, payload.Data.Code)
-	if err != nil || token == "" {
+	if exc, isException := exception.IsException(err); isException {
+		return e.JSON(http.StatusBadRequest, global.ErrorDTO{
+			Message: exc.Message,
+			Extensions: &global.ErrorExtension{
+				Code:  exc.Code,
+				Field: "$",
+			},
+		})
+	} else if err != nil || token == "" {
 		return echo.ErrUnauthorized
 	}
 

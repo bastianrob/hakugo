@@ -4,7 +4,7 @@ import Navigation from "./Navbar";
 
 export const Layout: FC<PropsWithChildren> = ({children}) => {
   return (
-    <div className="flex flex-col">
+    <>
       <Navigation />
       <SnackbarProvider
         dense
@@ -15,9 +15,9 @@ export const Layout: FC<PropsWithChildren> = ({children}) => {
           horizontal: "center",
         }}
       >
-        <main className="flex grow">{children}</main>
+        <main>{children}</main>
       </SnackbarProvider>
-    </div>
+    </>
   );
 };
 

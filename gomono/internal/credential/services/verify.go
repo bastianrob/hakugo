@@ -22,9 +22,9 @@ func (svc *CredentialService) Verify(ctx context.Context, email, code string) (s
 	// 2. Validate whether it's used or expired
 	now := time.Now()
 	if auth.Used {
-		return "", exception.New(nil, "Code is already used", exception.CodeValidationError)
+		return "", exception.New(nil, "Code is already used", "USED")
 	} else if now.Unix() > auth.ExpiredAt.Unix() {
-		return "", exception.New(nil, "Code is already expired", exception.CodeValidationError)
+		return "", exception.New(nil, "Code is already expired", "EXPIRED")
 	}
 
 	// 3. Set the auth as used
