@@ -1,4 +1,47 @@
 actions:
+  - name: authenticationResend
+    definition:
+      kind: synchronous
+      handler: '{{HOST_CREDENTIAL_SERVICE}}/resend'
+      timeout: 10
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "data": {
+                "email": {{$body.input.email}}
+              }
+            }
+        template_engine: Kriti
+        version: 2
+    permissions:
+      - role: partner
+      - role: customer
+      - role: anonymous
+    comment: Resend verification code
+  - name: authenticationVerify
+    definition:
+      kind: synchronous
+      handler: '{{HOST_CREDENTIAL_SERVICE}}/verify'
+      timeout: 10
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "data": {
+                "code": {{$body.input.code}},
+                "email": {{$body.input.email}}
+              }
+            }
+        template_engine: Kriti
+        version: 2
+    permissions:
+      - role: partner
+      - role: customer
+      - role: anonymous
+    comment: Verify authentication code
   - name: customerLogin
     definition:
       kind: synchronous
@@ -72,5 +115,7 @@ custom_types:
     - name: CustomerRegistrationInput
   objects:
     - name: LoginResponse
+    - name: Customer
     - name: CustomerRegistrationResponse
+    - name: AuthenticationResendResponse
   scalars: []

@@ -2,12 +2,14 @@ package credential
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
 	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
 	"github.com/bastianrob/gomono/pkg/exception"
+	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/go-redis/redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -50,6 +52,7 @@ func (m *RegistrationMock) Provider() string {
 
 type CredentialRepositoryMock struct {
 	mock.Mock
+	CredentialRepository
 }
 
 func (m *CredentialRepositoryMock) FindCredentialByIdentity(ctx context.Context, identity string) (*repositories.FindCredentialByIdentityResult, error) {
@@ -62,8 +65,8 @@ func (m *CredentialRepositoryMock) CountCredentialByIdentity(ctx context.Context
 	return int64(args.Int(0)), args.Error(1)
 }
 
-func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider string) (*repositories.CreateNewCustomerMutationResult, error) {
-	args := m.Called(ctx, identity, password, provider)
+func (m *CredentialRepositoryMock) CreateNewCustomer(ctx context.Context, input schema.CustomerRegisterInput) (*repositories.CreateNewCustomerMutationResult, error) {
+	args := m.Called(ctx, input)
 	return args.Get(0).(*repositories.CreateNewCustomerMutationResult), args.Error(1)
 }
 
@@ -85,16 +88,18 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			m := &CredentialRepositoryMock{}
 			m.On("CountCredentialByIdentity", mock.Anything, "exists@email.com").Return(1, nil)
 			m.On("CountCredentialByIdentity", mock.Anything, mock.Anything).Return(0, nil)
-			m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-				Return(&repositories.CreateNewCustomerMutationResult{Credential: struct {
-					ID       int64  `json:"id"`
-					Identity string `json:"identity"`
-					Customer struct {
-						Name  string `json:"name"`
-						Email string `json:"email"`
-						Phone string `json:"phone"`
-					} `json:"customer"`
-				}{ID: 1}}, nil)
+			m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+				Return(
+					&repositories.CreateNewCustomerMutationResult{
+						Credential: schema.Credential{
+							ID: 1,
+							Authentications: []schema.Authentication{
+								{Code: "12345123451234567890"},
+							},
+						},
+					},
+					nil,
+				)
 			return m
 		}(),
 		nil,
@@ -274,16 +279,11 @@ func TestCredentialService_publishCustomerRegistrationStartedEvent(t *testing.T)
 		when: args{
 			ctx: context.Background(),
 			result: &repositories.CreateNewCustomerMutationResult{
-				Credential: struct {
-					ID       int64  `json:"id"`
-					Identity string `json:"identity"`
-					Customer struct {
-						Name  string `json:"name"`
-						Email string `json:"email"`
-						Phone string `json:"phone"`
-					} `json:"customer"`
-				}{
+				Credential: schema.Credential{
 					ID: 1000,
+					Authentications: []schema.Authentication{
+						{Code: "12345123451234567890"},
+					},
 				},
 			},
 		},
@@ -293,7 +293,16 @@ func TestCredentialService_publishCustomerRegistrationStartedEvent(t *testing.T)
 	}}
 	for _, tt := range tests {
 		t.Run(tt.it, func(t *testing.T) {
-			err := tt.given.publishCustomerRegistrationStartedEvent(tt.when.ctx, tt.when.result)
+			err := tt.given.publishVerificationEmailCommand(tt.when.ctx, map[string]any{
+				"name":  tt.when.result.Credential.Customer.Name,
+				"email": tt.when.result.Credential.Customer.Email,
+				"code":  tt.when.result.Credential.Authentications[0].Code,
+				"redirect_host": fmt.Sprintf(
+					"http://localhost/register/confirmation?email=%s&code=%s",
+					tt.when.result.Credential.Customer.Email,
+					tt.when.result.Credential.Authentications[0].Code,
+				),
+			})
 			if tt.should.returnError {
 				assert.Error(t, err, "should return an error")
 			}

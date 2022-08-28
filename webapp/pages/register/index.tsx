@@ -164,7 +164,7 @@ const RegisterPage: NextPage = () => {
   };
 
   return (
-    <Container maxWidth="sm" className="shadow py-4 text-center h-full">
+    <Container maxWidth="sm" className="shadow py-4 text-center h-full rounded">
       <Stack textAlign="center" gap={2}>
         <Typography variant="h5">Sign Up</Typography>
 

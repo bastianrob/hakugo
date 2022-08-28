@@ -1,4 +1,5 @@
 - "!include public_attachment.yaml"
+- "!include public_authentication.yaml"
 - "!include public_booking.yaml"
 - "!include public_credential.yaml"
 - "!include public_customer.yaml"

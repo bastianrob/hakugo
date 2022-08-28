@@ -7,9 +7,12 @@ require (
 	github.com/caarlos0/env/v6 v6.9.3
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
+	github.com/google/go-cmp v0.5.8
+	github.com/jaevor/go-nanoid v1.2.0
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.8.0
 	github.com/machinebox/graphql v0.2.2
+	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 )
 
 require (

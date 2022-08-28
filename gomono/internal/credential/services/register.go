@@ -6,9 +6,10 @@ import (
 	"reflect"
 	"time"
 
-	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
 	"github.com/bastianrob/gomono/pkg/exception"
 	"github.com/bastianrob/gomono/pkg/global"
+	"github.com/bastianrob/gomono/pkg/global/idgen"
+	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,14 +29,30 @@ func (svc *CredentialService) NewCustomer(ctx context.Context, reg Registration)
 		return nil, err
 	}
 
+	authCode := idgen.AlphaNum20U()
+	authExpiry := time.Now().Add(24 * time.Hour)
 	hashedPassowrd, _ := hashPassword(reg.Password())
-	result, err := svc.repo.CreateNewCustomer(ctx, reg.Name(), reg.Identity(), reg.Phone(), hashedPassowrd, reg.Provider())
+	result, err := svc.repo.CreateNewCustomer(ctx, schema.CustomerRegisterInput{
+		Name:       reg.Name(),
+		Identity:   reg.Identity(),
+		Phone:      reg.Phone(),
+		Provider:   reg.Provider(),
+		Password:   hashedPassowrd,
+		AuthCode:   authCode,
+		AuthExpiry: authExpiry,
+	})
 	if err != nil {
 		logrus.Error(err)
 		return nil, exception.New(err, "Failed to create new customer", exception.CodeUnexpectedError)
 	}
 
-	svc.publishCustomerRegistrationStartedEvent(ctx, result)
+	svc.publishVerificationEmailCommand(ctx, map[string]any{
+		"name":          result.Credential.Customer.Name,
+		"email":         result.Credential.Customer.Email,
+		"code":          result.Credential.Authentications[0].Code,
+		"redirect_host": "http://localhost",
+	})
+
 	return result.Credential, nil
 }
 
@@ -74,9 +91,9 @@ func (svc *CredentialService) validateRegistration(ctx context.Context, reg Regi
 	return nil
 }
 
-func (svc *CredentialService) publishCustomerRegistrationStartedEvent(
+func (svc *CredentialService) publishVerificationEmailCommand(
 	ctx context.Context,
-	result *repositories.CreateNewCustomerMutationResult,
+	data map[string]any,
 ) error {
 
 	if svc.redisClient == nil || reflect.ValueOf(svc.redisClient).IsNil() {
@@ -89,10 +106,10 @@ func (svc *CredentialService) publishCustomerRegistrationStartedEvent(
 		attempt += 1
 		err = svc.redisClient.
 			// TODO: Redis will broadcast to all subs which is dangerous if subscriber have multiple pods
-			Publish(ctx, "CustomerRegistrationStarted", global.EventDTO[any]{
+			Publish(ctx, "SendVerificationEmailCommand", global.EventDTO[any]{
 				IssuedAt: time.Now(),
-				Type:     "CustomerRegistrationStarted",
-				Data:     result.Credential,
+				Type:     "SendVerificationEmailCommand",
+				Data:     data,
 			}).
 			Err()
 

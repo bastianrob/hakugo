@@ -1,0 +1,5 @@
+mutation authenticationVerify($email: String!, $code: String!) {
+  authenticationVerify(email: $email, code: $code) {
+    accessToken
+  }
+}

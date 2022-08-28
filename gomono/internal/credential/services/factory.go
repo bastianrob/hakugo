@@ -5,6 +5,7 @@ import (
 
 	"github.com/bastianrob/gomono/internal/credential/configs"
 	repositories "github.com/bastianrob/gomono/internal/credential/repositories"
+	"github.com/bastianrob/gomono/pkg/schema"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis/v9"
 	"github.com/golang-jwt/jwt/v4"
@@ -13,7 +14,10 @@ import (
 type CredentialRepository interface {
 	FindCredentialByIdentity(context.Context, string) (*repositories.FindCredentialByIdentityResult, error)
 	CountCredentialByIdentity(context.Context, string) (int64, error)
-	CreateNewCustomer(ctx context.Context, name, identity, phone, password, provider string) (*repositories.CreateNewCustomerMutationResult, error)
+	CreateNewCustomer(ctx context.Context, input schema.CustomerRegisterInput) (*repositories.CreateNewCustomerMutationResult, error)
+	FindAuthenticationByCode(ctx context.Context, code string) (*schema.Authentication, error)
+	SetAuthenticationAsUsed(ctx context.Context, authID, credentialID int64) (*schema.Authentication, error)
+	CreateNewAuthentication(ctx context.Context, input *schema.InsertAuthenticationInput) (*schema.Authentication, error)
 }
 
 type CredentialService struct {
