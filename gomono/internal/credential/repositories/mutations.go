@@ -76,25 +76,79 @@ func (repo *CredentialRepository) CreateNewCustomer(ctx context.Context, input s
 	return resp, nil
 }
 
-func (repo *CredentialRepository) SetAuthenticationAsUsed(ctx context.Context, authID int64) (*schema.Authentication, error) {
+func (repo *CredentialRepository) SetAuthenticationAsUsed(ctx context.Context, authID, credentialID int64) (*schema.Authentication, error) {
 	query := graphql.NewRequest(`
-	mutation updateAuthentication($id: bigint!) {
+	mutation updateAuthentication(
+		$authID: bigint!
+		$credentialID: bigint!
+	) {
 		authentication: update_authentication_by_pk(
-			pk_columns: { id: $id },
+			pk_columns: { id: $authID }
 			_set: { used: true }
 		) {
 			used
 		}
-	}`)
+		update_customer(
+			where: {
+				credential_id: { _eq: $credentialID }
+				activated_at: { _is_null: true }
+			}
+			_set: { activated_at: "now" }
+		) {
+			affected_rows
+		}
+	}
+	`)
 
 	query.Header.Add(configs.App.GraphQL.AuthHeader, configs.App.GraphQL.AuthSecret)
-	query.Var("id", authID)
+	query.Var("authID", authID)
+	query.Var("credentialID", credentialID)
 
 	resp := &struct {
 		Authentication *schema.Authentication `json:"authentication"`
 	}{}
 	if err := repo.gqlClient.Run(ctx, query, resp); err != nil || resp.Authentication == nil || !resp.Authentication.Used {
 		return nil, exception.New(err, "Failed to updated authentication code", exception.CodeUnexpectedError)
+	}
+
+	return resp.Authentication, nil
+}
+
+func (repo *CredentialRepository) CreateNewAuthentication(ctx context.Context, input *schema.InsertAuthenticationInput) (*schema.Authentication, error) {
+	query := graphql.NewRequest(`
+	mutation insertAuthentication(
+		$credentialId: bigint!
+		$authCode: bpchar
+		$authExpiry: timestamptz
+	) {
+		authentication: insert_authentication_one(
+			object: {
+				credential_id: $credentialId
+				code: $authCode
+				expired_at: $authExpiry
+				used: false
+			}
+		) {
+			id
+			credential_id
+			created_at
+			expired_at
+			code
+			used
+		}
+	}	
+	`)
+
+	query.Header.Add(configs.App.GraphQL.AuthHeader, configs.App.GraphQL.AuthSecret)
+	query.Var("credentialId", input.CredentialID)
+	query.Var("authCode", input.Code)
+	query.Var("authExpiry", input.ExpiredAt)
+
+	resp := &struct {
+		Authentication *schema.Authentication `json:"authentication"`
+	}{}
+	if err := repo.gqlClient.Run(ctx, query, resp); err != nil || resp.Authentication == nil {
+		return nil, exception.New(err, "Failed to insert authentication code", exception.CodeUnexpectedError)
 	}
 
 	return resp.Authentication, nil

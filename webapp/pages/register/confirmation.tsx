@@ -13,6 +13,7 @@ import {setCookie} from "cookies-next";
 import {
   AuthenticationVerifyDocument,
   AuthenticationVerifyMutation,
+  useAuthenticationResendMutation,
 } from "graphql/generated";
 import {GetServerSidePropsContext, NextPage} from "next";
 import {useRouter} from "next/router";
@@ -35,6 +36,8 @@ const ConfirmationPage: NextPage<ConfirmationPageProps> = ({
   verificationState,
 }) => {
   const router = useRouter();
+  const [resendVerification, {loading, called}] =
+    useAuthenticationResendMutation();
   const [severity, title, desc] = useMemo<[AlertColor, string, string]>(() => {
     switch (verificationState) {
       case "waiting_verification":
@@ -69,6 +72,18 @@ const ConfirmationPage: NextPage<ConfirmationPageProps> = ({
     router.replace("/");
   }, 3 * 1000);
 
+  const disableResend =
+    loading ||
+    called ||
+    verificationState === "already_verified" ||
+    verificationState === "unexpected_error";
+
+  const handleResendVerification = async () => {
+    await resendVerification({
+      variables: {email},
+    });
+  };
+
   return (
     <Container maxWidth="sm">
       <Stack dir="vertical" gap={4}>
@@ -78,12 +93,7 @@ const ConfirmationPage: NextPage<ConfirmationPageProps> = ({
           {desc}
         </Alert>
 
-        <Button
-          disabled={
-            verificationState === "already_verified" ||
-            verificationState === "unexpected_error"
-          }
-        >
+        <Button disabled={disableResend} onClick={handleResendVerification}>
           Resend Verification
         </Button>
       </Stack>

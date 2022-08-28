@@ -10,8 +10,9 @@ import (
 )
 
 type AuthenticationVerifyRequest struct {
-	Email string `json:"email"`
-	Code  string `json:"code"`
+	Email    string `json:"email,omitempty"`
+	Code     string `json:"code,omitempty"`
+	Activate bool   `json:"activate,omitempty"`
 }
 
 func (cont *CredentialController) AuthenticationVerify(e echo.Context) error {
@@ -23,7 +24,7 @@ func (cont *CredentialController) AuthenticationVerify(e echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Please provide a valid auth verification format")
 	}
 
-	token, err := cont.service.Verify(e.Request().Context(), payload.Data.Email, payload.Data.Code)
+	token, err := cont.service.Verify(e.Request().Context(), payload.Data.Email, payload.Data.Code, payload.Data.Activate)
 	if exc, isException := exception.IsException(err); isException {
 		return e.JSON(http.StatusBadRequest, global.ErrorDTO{
 			Message: exc.Message,

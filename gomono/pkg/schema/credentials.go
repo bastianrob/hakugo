@@ -41,3 +41,9 @@ type CustomerRegisterInput struct {
 	AuthCode   string    `json:"auth_code,omitempty"`
 	AuthExpiry time.Time `json:"auth_expiry,omitempty"`
 }
+
+type InsertAuthenticationInput struct {
+	CredentialID int64     `json:"credential_id,omitempty"`
+	Code         string    `json:"code,omitempty"`
+	ExpiredAt    time.Time `json:"expired_at,omitempty"`
+}

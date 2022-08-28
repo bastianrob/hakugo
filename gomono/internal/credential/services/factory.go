@@ -16,7 +16,8 @@ type CredentialRepository interface {
 	CountCredentialByIdentity(context.Context, string) (int64, error)
 	CreateNewCustomer(ctx context.Context, input schema.CustomerRegisterInput) (*repositories.CreateNewCustomerMutationResult, error)
 	FindAuthenticationByCode(ctx context.Context, code string) (*schema.Authentication, error)
-	SetAuthenticationAsUsed(ctx context.Context, authID int64) (*schema.Authentication, error)
+	SetAuthenticationAsUsed(ctx context.Context, authID, credentialID int64) (*schema.Authentication, error)
+	CreateNewAuthentication(ctx context.Context, input *schema.InsertAuthenticationInput) (*schema.Authentication, error)
 }
 
 type CredentialService struct {

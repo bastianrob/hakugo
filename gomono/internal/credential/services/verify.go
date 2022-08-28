@@ -10,7 +10,7 @@ import (
 
 // Verify authentication code
 // return authToken and error
-func (svc *CredentialService) Verify(ctx context.Context, email, code string) (string, error) {
+func (svc *CredentialService) Verify(ctx context.Context, email, code string, activate bool) (string, error) {
 	// 1. Find the code
 	auth, err := svc.repo.FindAuthenticationByCode(ctx, code)
 	if exc, isException := exception.IsException(err); isException {
@@ -28,7 +28,7 @@ func (svc *CredentialService) Verify(ctx context.Context, email, code string) (s
 	}
 
 	// 3. Set the auth as used
-	if _, exc := svc.repo.SetAuthenticationAsUsed(ctx, auth.ID); err != nil {
+	if _, exc := svc.repo.SetAuthenticationAsUsed(ctx, auth.ID, auth.CredentialID); err != nil {
 		return "", exc
 	}
 

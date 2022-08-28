@@ -23,7 +23,7 @@ func (m *CredentialRepositoryMock) FindAuthenticationByCode(ctx context.Context,
 	return nil, args.Error(1)
 }
 
-func (m *CredentialRepositoryMock) SetAuthenticationAsUsed(ctx context.Context, authID int64) (*schema.Authentication, error) {
+func (m *CredentialRepositoryMock) SetAuthenticationAsUsed(ctx context.Context, authID, credID int64) (*schema.Authentication, error) {
 	args := m.Called(ctx, authID)
 	auth, ok := args.Get(0).(*schema.Authentication)
 	if ok {
@@ -47,7 +47,7 @@ func TestCredentialService_Verify(t *testing.T) {
 			m.On("FindAuthenticationByCode", mock.Anything, "EXPIRED-CODE-4567890").Return(&schema.Authentication{ExpiredAt: yesterday}, nil)
 			m.On("FindAuthenticationByCode", mock.Anything, "USEDALR-CODE-4567890").Return(&schema.Authentication{ExpiredAt: tomorrow, Used: true}, nil)
 			m.On("FindAuthenticationByCode", mock.Anything, "INVALID-CODE-4567890").Return(nil, exception.New(nil, "NOT FOUND", exception.CodeNotFound))
-			m.On("SetAuthenticationAsUsed", mock.Anything, mock.Anything).Return(&schema.Authentication{}, nil)
+			m.On("SetAuthenticationAsUsed", mock.Anything, mock.Anything, mock.Anything).Return(&schema.Authentication{}, nil)
 			return m
 		}(),
 		nil,
@@ -118,7 +118,7 @@ func TestCredentialService_Verify(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.it, func(t *testing.T) {
-			token, err := tt.given.Verify(tt.when.ctx, tt.when.email, tt.when.code)
+			token, err := tt.given.Verify(tt.when.ctx, tt.when.email, tt.when.code, true)
 			if tt.should.returnErr {
 				assert.Error(t, err)
 				assert.Empty(t, token)

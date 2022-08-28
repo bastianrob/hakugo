@@ -1,0 +1,6 @@
+mutation authenticationResend($email: String!) {
+  authenticationResend(email: $email) {
+    created_at
+    expired_at
+  }
+}

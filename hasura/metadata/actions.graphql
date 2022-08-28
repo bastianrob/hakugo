@@ -1,4 +1,10 @@
 type Mutation {
+  authenticationResend(
+    email: String!
+  ): AuthenticationResendResponse
+}
+
+type Mutation {
   authenticationVerify(
     email: String!
     code: String!
@@ -48,5 +54,10 @@ type CustomerRegistrationResponse {
   id: Int!
   identity: String!
   customer: Customer
+}
+
+type AuthenticationResendResponse {
+  created_at: timestamptz
+  expired_at: timestamptz
 }
 
