@@ -17,12 +17,11 @@ const httpLink = createHttpLink({
 const authLink = setContext((_, {headers}) => {
   const token = getCookie("access-token");
 
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : undefined,
-    },
-  };
+  return !token
+    ? headers
+    : {
+        headers: {...headers, authorization: `Bearer ${token}`},
+      };
 });
 
 export const apolloClient = new ApolloClient({

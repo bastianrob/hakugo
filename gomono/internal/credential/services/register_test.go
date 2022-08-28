@@ -2,6 +2,7 @@ package credential
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -88,7 +89,17 @@ func TestCredentialService_NewCustomer(t *testing.T) {
 			m.On("CountCredentialByIdentity", mock.Anything, "exists@email.com").Return(1, nil)
 			m.On("CountCredentialByIdentity", mock.Anything, mock.Anything).Return(0, nil)
 			m.On("CreateNewCustomer", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-				Return(&repositories.CreateNewCustomerMutationResult{Credential: schema.Credential{ID: 1}}, nil)
+				Return(
+					&repositories.CreateNewCustomerMutationResult{
+						Credential: schema.Credential{
+							ID: 1,
+							Authentications: []schema.Authentication{
+								{Code: "12345123451234567890"},
+							},
+						},
+					},
+					nil,
+				)
 			return m
 		}(),
 		nil,
@@ -270,6 +281,9 @@ func TestCredentialService_publishCustomerRegistrationStartedEvent(t *testing.T)
 			result: &repositories.CreateNewCustomerMutationResult{
 				Credential: schema.Credential{
 					ID: 1000,
+					Authentications: []schema.Authentication{
+						{Code: "12345123451234567890"},
+					},
 				},
 			},
 		},
@@ -279,7 +293,16 @@ func TestCredentialService_publishCustomerRegistrationStartedEvent(t *testing.T)
 	}}
 	for _, tt := range tests {
 		t.Run(tt.it, func(t *testing.T) {
-			err := tt.given.publishCustomerRegistrationStartedEvent(tt.when.ctx, tt.when.result)
+			err := tt.given.publishVerificationEmailCommand(tt.when.ctx, map[string]any{
+				"name":  tt.when.result.Credential.Customer.Name,
+				"email": tt.when.result.Credential.Customer.Email,
+				"code":  tt.when.result.Credential.Authentications[0].Code,
+				"redirect_host": fmt.Sprintf(
+					"http://localhost/register/confirmation?email=%s&code=%s",
+					tt.when.result.Credential.Customer.Email,
+					tt.when.result.Credential.Authentications[0].Code,
+				),
+			})
 			if tt.should.returnError {
 				assert.Error(t, err, "should return an error")
 			}

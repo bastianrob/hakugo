@@ -3,32 +3,23 @@ package notification
 import (
 	"bytes"
 	"encoding/json"
-	"time"
 
+	"github.com/bastianrob/gomono/pkg/global"
 	"github.com/go-redis/redis/v9"
 	"github.com/mailjet/mailjet-apiv3-go"
 	"github.com/sirupsen/logrus"
 )
 
-type CustomerRegistrationStartedEvent struct {
-	ID       int64  `json:"id"`
-	Identity string `json:"identity"`
-	Customer struct {
-		Name  string `json:"name"`
-		Email string `json:"email"`
-		Phone string `json:"phone"`
-	} `json:"customer"`
-	Authentications []struct {
-		ID        int64     `json:"id"`
-		Code      string    `json:"code"`
-		CreatedAt time.Time `json:"created_at"`
-		ExpiredAt time.Time `json:"expired_at"`
-	} `json:"authentications"`
+type SendVerificationEmailCommand struct {
+	Name         string `json:"name,omitempty"`
+	Email        string `json:"email,omitempty"`
+	Code         string `json:"code,omitempty"`
+	RedirectHost string `json:"redirect_host,omitempty"`
 }
 
-func (svc *NotificationService) consumeCustomerRegistrationStarted(ch <-chan *redis.Message) {
+func (svc *NotificationService) consumeVerificationEmailCommand(ch <-chan *redis.Message) {
 	for message := range ch {
-		registrationEvent := CustomerRegistrationStartedEvent{}
+		registrationEvent := global.EventDTO[SendVerificationEmailCommand]{}
 		if err := json.Unmarshal([]byte(message.Payload), &registrationEvent); err != nil {
 			logrus.Errorf("%s", err)
 			continue
@@ -36,10 +27,10 @@ func (svc *NotificationService) consumeCustomerRegistrationStarted(ch <-chan *re
 
 		buffer := bytes.Buffer{}
 		mailVerificationTemplate.Execute(&buffer, MailVerificationTemplate{
-			Name:  registrationEvent.Customer.Name,
-			Email: registrationEvent.Customer.Email,
-			Code:  registrationEvent.Authentications[0].Code,
-			Host:  "http://localhost",
+			Name:  registrationEvent.Data.Name,
+			Email: registrationEvent.Data.Email,
+			Code:  registrationEvent.Data.Code,
+			Host:  registrationEvent.Data.RedirectHost,
 		})
 
 		messagesInfo := []mailjet.InfoMessagesV31{
@@ -50,8 +41,8 @@ func (svc *NotificationService) consumeCustomerRegistrationStarted(ch <-chan *re
 				},
 				To: &mailjet.RecipientsV31{
 					mailjet.RecipientV31{
-						Email: registrationEvent.Customer.Email,
-						Name:  registrationEvent.Customer.Name,
+						Email: "robin.bas90@gmail.com", //registrationEvent.Data.Email,
+						Name:  registrationEvent.Data.Name,
 					},
 				},
 				Subject:  "Verify Your Email",

@@ -6,7 +6,7 @@ import (
 )
 
 type Subscription interface {
-	CustomerRegistrationStarted() <-chan *redis.Message
+	SendVerificationEmailCommand() <-chan *redis.Message
 }
 
 type NotificationService struct {
@@ -27,5 +27,5 @@ func NewNotificationService(
 }
 
 func (svc *NotificationService) Run() {
-	go svc.consumeCustomerRegistrationStarted(svc.subscription.CustomerRegistrationStarted())
+	go svc.consumeVerificationEmailCommand(svc.subscription.SendVerificationEmailCommand())
 }

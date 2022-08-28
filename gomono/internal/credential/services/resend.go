@@ -23,5 +23,13 @@ func (svc *CredentialService) Resend(ctx context.Context, email string) (any, er
 	}
 
 	auth, err := svc.repo.CreateNewAuthentication(ctx, input)
+
+	svc.publishVerificationEmailCommand(ctx, map[string]any{
+		"name":          email,
+		"email":         email,
+		"code":          auth.Code,
+		"redirect_host": "http://localhost",
+	})
+
 	return auth, err
 }
