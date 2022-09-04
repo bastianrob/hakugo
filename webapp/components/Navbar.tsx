@@ -4,13 +4,11 @@ import {
   Box,
   Button,
   Container,
-  Divider,
   IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
   Toolbar,
-  Tooltip,
 } from "@mui/material";
 import {FC, useRef, useState} from "react";
 import CloudCircleIcon from "@mui/icons-material/CloudCircle";
@@ -18,16 +16,19 @@ import Spacer from "./Spacer";
 import {useGetCurrentUserLazyQuery} from "graphql/generated";
 import {useEffectOnce, useToggle} from "react-use";
 import {getInitialFromEmail} from "@/libs/stringUtilities";
-import {Logout, Person, PersonAdd, Settings} from "@mui/icons-material";
+import {Logout, Person, Settings} from "@mui/icons-material";
 import clsx from "clsx";
+import {useRouter} from "next/router";
+import {deleteCookie} from "cookies-next";
 
 export const Navigation: FC = () => {
-  const [isLoggedIn, setLoggedIn] = useState(false);
   const [initial, setInitial] = useState("");
-  const [isOpen, setOpened] = useToggle(false);
-  const menuAnchor = useRef(null);
-
+  const [isLoggedIn, setLoggedIn] = useState(false);
+  const [isMenuOpen, setMenuOpened] = useToggle(false);
   const [getCurrentUser] = useGetCurrentUserLazyQuery();
+
+  const router = useRouter();
+  const menuAnchor = useRef(null);
 
   useEffectOnce(() => {
     getCurrentUser().then(({data}) => {
@@ -37,6 +38,16 @@ export const Navigation: FC = () => {
       }
     });
   });
+
+  const handleLogout = () => {
+    deleteCookie("access-token");
+    deleteCookie("logged-user");
+    setMenuOpened(false);
+    setLoggedIn(false);
+    setInitial("");
+
+    router.replace("/");
+  };
 
   return (
     <AppBar position="static">
@@ -50,7 +61,7 @@ export const Navigation: FC = () => {
               <IconButton
                 ref={menuAnchor}
                 size="small"
-                onClick={() => setOpened(true)}
+                onClick={() => setMenuOpened(true)}
               >
                 <Avatar
                   className={clsx(
@@ -62,16 +73,20 @@ export const Navigation: FC = () => {
                 </Avatar>
               </IconButton>
             ) : (
-              <Button variant="text" color="inherit">
+              <Button
+                variant="text"
+                color="inherit"
+                onClick={() => router.push("/login")}
+              >
                 Sign In
               </Button>
             )}
           </Box>
 
           <Menu
-            open={isOpen}
+            open={isMenuOpen}
             anchorEl={menuAnchor?.current}
-            onClose={() => setOpened(false)}
+            onClose={() => setMenuOpened(false)}
             anchorOrigin={{
               vertical: "bottom",
               horizontal: "right",
@@ -93,7 +108,7 @@ export const Navigation: FC = () => {
               </ListItemIcon>
               Settings
             </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={handleLogout}>
               <ListItemIcon>
                 <Logout fontSize="small" />
               </ListItemIcon>
