@@ -26,7 +26,31 @@ const authLink = setContext((_, {headers}) => {
 
 export const apolloClient = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          currentUser: {
+            read(_, {}) {
+              const loggedUser = getCookie("logged-user");
+              if (!loggedUser) {
+                return {
+                  isLoggedIn: false,
+                };
+              }
+
+              const [email, name] = loggedUser.toString().split(",", 2);
+              return {
+                isLoggedIn: true,
+                email,
+                name,
+              };
+            },
+          },
+        },
+      },
+    },
+  }),
 });
 
 export default apolloClient;

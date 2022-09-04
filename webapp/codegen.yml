@@ -1,6 +1,8 @@
 watch: true
 overwrite: true
-schema: ${APP_HOST_GQL:"http://localhost:8080/v1/graphql"}
+schema: 
+ - ${APP_HOST_GQL:"http://localhost:8080/v1/graphql"}
+ - ./graphql/client-schema.graphql
 documents: "./graphql/**/*.graphql"
 generates:
   graphql/generated.ts:

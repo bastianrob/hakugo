@@ -75,6 +75,7 @@ const LoginPage: NextPage = () => {
         },
       });
       setCookie("access-token", data?.customerLogin?.accessToken);
+      setCookie("logged-user", `${email}`);
       const snackId = enqueueSnackbar("You have successfully logged in", {
         variant: "success",
         onClick: () => closeSnackbar(snackId),

@@ -1,0 +1,10 @@
+type CurrentUser {
+  isLoggedIn: Boolean
+  email: String
+  phone: String
+  name: String
+}
+
+extend type query_root {
+  currentUser: CurrentUser
+}
